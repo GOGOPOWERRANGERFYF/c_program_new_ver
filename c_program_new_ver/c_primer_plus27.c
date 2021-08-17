@@ -107,6 +107,7 @@ void main(void){
 // 重点：函数指针的知识点
 // 
 // 概念：函数签名function signature，即函数的返回(值)类型和形参类型
+// 例子：void funcname(int); 去掉funcname
 //  
 // 附加知识点：
 //      函数原型声明的形参可以只声明形参类型即可；
