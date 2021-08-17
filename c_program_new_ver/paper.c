@@ -16,6 +16,12 @@ float func_2(int);
 //               *函数指针，机器指令中给出函数指针的地址，先读取函数指针，再访问函数，间接寻址
 int (*function_signature)(int *);
 
+typedef struct fyf_object{
+    int fyf_object_int;
+    // 函数指针类型成员
+    float (*fyf_object_function_pointer)(int);
+} fyf_object;
+
 // 了解内容(网络内容)：void 无类型；void * 无类型指针，可以指向任何类型的指针
 void main(void){
     // function_signature = func_2;
@@ -26,16 +32,24 @@ void main(void){
     function_signature = func_1;
     // & 取地址运算符；* 间接运算符 
     // &*p 两个运算符相互抵消，*通过指针访问，然后&再取指针
-    printf("%p\n", &function_signature);
+    printf("function_signature:%p\n", function_signature);
+    printf("func_1:%p\n", func_1);
+
+    fyf_object fyf_object_1;
+    fyf_object_1.fyf_object_function_pointer = func_2;
+    printf("fyf_object_1.fyf_object_function_pointer:%p\n",
+     fyf_object_1.fyf_object_function_pointer);
+    printf("func_2:%p\n", func_2);
+
     return;
 }
 
 int func_1(int * temp){
-
+    printf("func_1\n");
     return 0;
 }
 
 float func_2(int temp){
-
-    return 1.0f;
+    printf("func_2\n");
+    return 0.0f;
 }
