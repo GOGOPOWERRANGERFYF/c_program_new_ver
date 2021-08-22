@@ -114,3 +114,10 @@ void main(void){
 //      温习之前在书本上之前看到的知识点，函数原型声明的形参名和函数定义的形参名可以不同
 //
 // 函数名可以用于表示函数的地址
+
+// 数据指针访问数据；函数指针访问函数
+// 函数名是指针，函数名和指针可以互换使用
+// ANSI C中，func_pointer(parameter)与(*parameter)(parameter)与func(parameter)等价
+
+// 函数指针和数据指针一样可以做形参
+// ==>paper.c
