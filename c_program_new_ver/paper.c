@@ -54,4 +54,3 @@ float func_2(int temp){
     return 0.0f;
 }
 
-
