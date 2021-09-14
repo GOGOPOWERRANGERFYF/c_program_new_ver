@@ -3,15 +3,15 @@ int create_array(int index_max);
 int array_example1(void);
 
 void main(void){
-    //create_array(5);
-    array_example1();
+    create_array(5);
+    //array_example1();
     return;
 }
 
 int create_array(int index_max){
     int i, index = 0, value = 1, array[index_max];
     int (* array_pointer)[index_max];
-    for (i = 0; i <= index_max; i++){
+    for (i = 0; i < index_max; i++){
         array[index] = value++;
         index++;
     }
@@ -36,25 +36,22 @@ int create_array(int index_max){
     //  以上这些其实只要记住了*为间接运算符就很容易理解了
     //  更深层理解的话回忆一下立即寻址，直接寻址，间接寻址的知识点就OK了
     array_pointer = &array;
-    for (i = 0; i <= index_max; i++){
+    for (i = 0; i < index_max; i++){
         printf("array[%d] = %d\n",
          i, array[i]);
     }
     printf("---------------------------------------------------\n");
-    for (i = 0; i <= index_max; i++){
+    for (i = 0; i < index_max; i++){
         printf("array_pointer:%p, array_element_pointer:%p\n",
          &array+i, array+i);
     }
     printf("---------------------------------------------------\n");
-    for (i = 0; i <= index_max; i++){
+    for (i = 0; i < index_max; i++){
         printf("array_pointer:%p, array_element_pointer:%p\n",
          array_pointer+i, array+i);
     }
     printf("---------------------------------------------------\n");
     printf("&array:%zd\n", sizeof(*&array));
-    // 由以上输出发现：&array+1表达式的值为数组最后一个元素的指针/地址
-    // 个人推理，之所以指向数组的最后一个元素，而不是指向最后一个元素的后继元素
-    // 后继元素的指针已经数组越界了
     // 数组可以通过malloc(sizeof(int)*index)实现的
     return 0;
 }
@@ -68,5 +65,7 @@ int array_example1(void){
     printf("*array,the first element of array: %d\n", *array);
     printf("sizeof(*&array): %zd\n", sizeof(*&array));
     printf("sizeof(*array_pointer): %zd\n", sizeof(*array_pointer));
+    printf("array_pointer(%%p):%p\narray_pointer+1(%%p):%p\n", array_pointer, array_pointer+1);
+    printf("&array[2](%%p)%p\n", &array[2]);
     return 0;
 }
