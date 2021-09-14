@@ -57,9 +57,10 @@ int create_array(int index_max){
 }
 
 int array_example1(void){
-    int array[3] = {3, 5, 8};
     // 数组声明里的下标为元素个数，太久不写C了犯这种低级错误。。。
+    int array[3] = {3, 5, 8};
     // 下面的声明为声明一个3个int类型元素的指针,所以赋值的时候是赋值一个该类型的数组指针
+    // 重点：记住这是数组指针变量，不是数组啊。。。
     int (* array_pointer)[3] = &array;
     printf("sizeof(*array): %zd\n", sizeof(*array));
     printf("*array,the first element of array: %d\n", *array);
