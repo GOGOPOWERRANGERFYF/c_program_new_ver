@@ -64,8 +64,9 @@ int array_example1(void){
     // 数组声明里的下标为元素个数，太久不写C了犯这种低级错误。。。
     // 下面的声明为声明一个3个int类型元素的指针,所以赋值的时候是赋值一个该类型的数组指针
     int (* array_pointer)[3] = &array;
-    printf("%zd\n", sizeof(*array));
-    printf("%zd\n", sizeof(*&array));
-    printf("%zd\n", sizeof(*array_pointer));
+    printf("sizeof(*array): %zd\n", sizeof(*array));
+    printf("*array,the first element of array: %d\n", *array);
+    printf("sizeof(*&array): %zd\n", sizeof(*&array));
+    printf("sizeof(*array_pointer): %zd\n", sizeof(*array_pointer));
     return 0;
 }
