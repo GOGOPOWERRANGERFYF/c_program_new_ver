@@ -17,9 +17,9 @@ void main(void){
 //  不过说到底还不是别人编译器要怎样你就要怎么写,不服去学编译原理,自己写个编译器。。。
 //  目前了解到的一点编译原理知识点，正则匹配，语义分析等等等。。。
 int create_array(int index_max){
-    int i, index = 0, value = 1, array[index_max];
+    int index = 0, value = 1, array[index_max];
     int (* array_pointer)[index_max];
-    for (i = 0; i < index_max; i++){
+    for (index = 0; index < index_max; index++){
         array[index] = value++;
         index++;
     }
@@ -44,19 +44,19 @@ int create_array(int index_max){
     //  以上这些其实只要记住了*为间接运算符就很容易理解了
     //  更深层理解的话回忆一下立即寻址，直接寻址，间接寻址的知识点就OK了
     array_pointer = &array;
-    for (i = 0; i < index_max; i++){
+    for (index = 0; index < index_max; index++){
         printf("array[%d] = %d\n",
-         i, array[i]);
+         index, array[index]);
     }
     printf("---------------------------------------------------\n");
-    for (i = 0; i < index_max; i++){
+    for (index = 0; index < index_max; index++){
         printf("array_pointer:%p, array_element_pointer:%p\n",
-         &array+i, array+i);
+         &array+index, array+index);
     }
     printf("---------------------------------------------------\n");
-    for (i = 0; i < index_max; i++){
+    for (index = 0; index < index_max; index++){
         printf("array_pointer:%p, array_element_pointer:%p\n",
-         array_pointer+i, array+i);
+         array_pointer+index, array+index);
     }
     printf("---------------------------------------------------\n");
     printf("&array:%zd\n", sizeof(*&array));
