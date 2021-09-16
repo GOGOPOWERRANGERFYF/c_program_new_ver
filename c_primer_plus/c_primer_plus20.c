@@ -9,6 +9,8 @@ int text_counter(void);
 int conditional_operator(void);
 int max_integer(void);
 int cans_of_paint(void);
+int loop_continue(void);
+int loop_break(void);
 
 int main(void)
 {
@@ -24,7 +26,10 @@ int main(void)
     //text_counter();
     //conditional_operator();
     //max_integer();
-    cans_of_paint();
+    //cans_of_paint();
+
+    loop_continue();
+    loop_break();
     return 0;
 }
 
@@ -130,6 +135,27 @@ int cans_of_paint(void)
 // 《c primer plus 第六版 中文版》P453
 
 // 循环辅助: continue和break
+int loop_continue(void){
+    int array[] = {1, 2, 3, 4, 5}, i;
+    for (i = 0; i <= 4; i++){
+        if (array[i] <= 3){
+            continue;
+        }
+        printf("%d\n", array[i]);
+    }
+    return 0;
+}
+
+int loop_break(void){
+    int array[] = {1, 2, 3, 4, 5}, i;
+    for (i = 0; i <= 4; i++){
+        if (array[i] >= 3){
+            break;
+        }
+        printf("%d\n", array[i]);
+    }
+    return 0;
+}
 
 // 7.6
 // ......
