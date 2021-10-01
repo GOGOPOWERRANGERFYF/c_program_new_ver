@@ -57,6 +57,7 @@ void bitwise_operator(void){
 // 15.3.7 移位运算符
 //  shift 转移
 //  移位运算符向左或向右移动位
+//  << 左边抛弃,右边补充0
 void left_right_shift(void){
     char temp_char;
     temp_char = 0b00011000 << 2;

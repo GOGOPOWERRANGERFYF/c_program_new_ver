@@ -35,7 +35,7 @@ void width_character_string(void);
 
 void main(void){
     // stdint.h头文件
-    // 8bit unsigned interger type
+    // 8bit unsigned integer type
     // uint8_t uint16_t uint32_t uint64_t
     // uint8_t只是为unsigned char定义的别名...
     // _t typedef定义的类型别名

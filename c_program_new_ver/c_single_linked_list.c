@@ -2,7 +2,7 @@
 #include <stdlib.h>
 typedef struct node {
     struct node * next_node_pointer;
-    int interger_data;
+    int integer_data;
 } node;
 //} node, * root_pointer;
 // root_pointer为node结构指针类型的别名
@@ -11,7 +11,7 @@ typedef struct node {
 
 // struct node {
 //     struct node * next_node_pointer;
-//     int interger_data;
+//     int integer_data;
 // } node;
 // 
 // typedef struct node * root_pointer;
@@ -31,7 +31,7 @@ int main(void){
 
     header_p = single_linked_list_create_head();
     printf("header_p: %p\n", header_p);
-    printf("%d\n", header_p->next_node_pointer->interger_data);
+    printf("%d\n", header_p->next_node_pointer->integer_data);
 
 
     return 0;
@@ -81,7 +81,7 @@ node * single_linked_list_create_head(void){
         node * node_pointer;
         node_pointer = (node *)malloc(sizeof(node));
         //赋值给结构成员(整型成员)
-        node_pointer->interger_data = int_temp;
+        node_pointer->integer_data = int_temp;
         //赋值给结构成员(结构指针成员)
         //node_pointer->next_node_pointer = NULL;
         node_pointer->next_node_pointer = root_node_pointer->next_node_pointer;
@@ -117,7 +117,7 @@ node * single_linked_list_create_tail(void){
         //      结构指针间接访问结构成员(整数类型变量)
         //  机器码理解(关键:机器码中并没有结构的信息):
         //      
-        new_node_pointer->interger_data = int_temp;
+        new_node_pointer->integer_data = int_temp;
         //替换配对1
         new_node_pointer->next_node_pointer = move_pointer->next_node_pointer;
 
