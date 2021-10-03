@@ -70,6 +70,7 @@ void main(void){
     integer promotion in c 整形提升(算是一种隐式转换)
         char、short传入printf的可变参数(传参,赋值给形参)或进行表达式算术运算时,提升为int类型
         比较好的记忆方法：有符号整数的二补码，-5的8位二补码或16位二补码 整形提升位  32位的二补码
+                       而有符号负整数的8位、16位、32位、64位二补数就是该有符号负整数的二补码
         ***(sizeof并不是算术运算符)
         unsigned char、short则提升为unsigned int类型
 */
