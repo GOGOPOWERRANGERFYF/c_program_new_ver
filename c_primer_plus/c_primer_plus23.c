@@ -1,4 +1,6 @@
 // 第十章 数组和指针
+// 这里为《c primer plus 第6版 中文版》学习笔记,
+//  另外有array_pointer.c文件内容作为个人补充 (20211008)
 #include <stdio.h>
 #include <unistd.h>
 //#include <windows.h>
@@ -86,7 +88,7 @@ void designated_initializer(void){
     return;
 }
 
-// 给数组元素赋值
+// 10.1.3 给数组元素赋值
 void array_element_assignment(void){
     // c不允许把数组作为一个单元赋给另一个数组 
     int array1[5];
@@ -138,7 +140,7 @@ void array_size(void){
     return;
 }
 
-// 多维数组
+// 10.2 多维数组
 void multidimensional_array_1(void){
     unsigned int i, j;
     // 主数组(master array)有5个元素
@@ -312,7 +314,7 @@ void pointer_parameter_b(int array[], int n){
 //  把一个指向数组的指针作为实参传递给函数,从而使函数不用复制整个
 //  数组就能访问数组中的对象
 
-// 使用指针形参
+// 10.4.1 使用指针形参
 // 函数原型可以省略形参名,函数定义的函数头不可以省略
 // 函数处理数组的两种方式:
 //  1. 知道数组在哪里开始,数组元素个数: void func(int * start, int array_size)
@@ -350,3 +352,6 @@ void use_pointer_parameter(int * start, int * end){
 // 描述标识符但缺少标识符大小信息的类型
 //  例如: 尚未指定其维度的数组类型 array[]
 //  此外还有: 未指定成员的结构(structrue)类型和联合(union)类型
+
+// 10.7 指针和多维数组
+//      int a[5][2];    声明一个数组,数组有5个元素,元素为内含两个元素的int类型数组
