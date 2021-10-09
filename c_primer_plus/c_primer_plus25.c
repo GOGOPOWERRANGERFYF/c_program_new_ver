@@ -44,3 +44,15 @@ void memory_allocation(void){
     printf("%d\n", *(int_pointer + 3));
     return;
 }
+
+// 12.5 ANSI C类型限定符
+//  温习：
+//      标记和修饰符
+//      附属关键字：  long short unsigned
+//      类型限定符
+//
+//  12.5.1 const类型限定符
+//
+//  12.5.2 volatile类型限定符
+//  volatile 易变的;
+//    
