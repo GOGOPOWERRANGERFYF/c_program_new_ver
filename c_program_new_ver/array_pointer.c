@@ -129,6 +129,7 @@ int create_array(int index_max){
 
         个人心得：理解的核心关键,C语言的声明语法是"独立"的,有自己的一套规则 (声明中;声明形式)
                 不要拿平时使用的运算符与运算对象的表达式去硬套  (使用中;使用形式)
+                运算符在声明形式中和在使用形式中并不一样(有某些相似的地方)
                 虽然C语言声明语法的设计原则为：
                     The declaration of an object should look like its use.
                 C语言的声明语法的设计原则：
