@@ -336,7 +336,7 @@ int arch_operator(void){
 //  但有啥要整这么复杂...目前个人水平太低,不太理解干嘛要这样做...
 
 // 10.1.6 不完整的声明
-//  struct b;   不完整的结构生民
+//  struct b;   不完整的结构声明
 //  struct a {
 //      struct b * pointer;
 //  };

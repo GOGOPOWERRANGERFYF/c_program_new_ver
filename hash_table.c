@@ -1,0 +1,64 @@
+#include <stdio.h>
+#define NULL_CHAR '\0'
+// 不完整的结构声明(结构声明前置)
+struct valuenode;
+struct valuenode * keyArrayInitial(unsigned long int index);
+int hashFunction(char *cp, char (*cap)[]);
+int printAttribute(char *cp, char (*cap)[]);
+
+// 结构声明
+typedef struct valuenode {
+    // 这里还不能使用别名,编译器还没读取到别名的代码
+    // struct valuenode 声明结构类型变量
+    struct valuenode *vp;
+    char *char_pointer;
+} valuenode;
+//之后可以使用valuenode结构类型别名进行声明
+
+int main(void) {
+    char hash_array[] = "color";
+    char *cp = hash_array, (*cap)[] = &hash_array;
+    //hashFunction(cp, cap);
+    keyArrayInitial(5LU);
+    return 0;
+}
+
+// 根据C的声明语法,标识符先与圆括号结合,表示是一个函数,
+// 函数的值为返回值,返回值与*结合指向一个对象,表示返回值为一个指针,
+// 与类型说明符结合,说明了指针指向的值(对象)的类型,也表明了指向该对象的指针的类型
+valuenode * keyArrayInitial(unsigned long int index) {
+    valuenode *valuenode_pointer = NULL, valuenode_array[index], value;
+    value.char_pointer = "hello world";
+    printf("%c\n", *value.char_pointer);
+    printf("%c\n", *"hello world");
+    printf("%c\n", *("hello world" + 1));
+    return valuenode_pointer;
+}
+
+int hashFunction(char *cp, char (*cap)[]) {
+    int i;
+    unsigned long int uli_temp = 0UL, result;
+    // cp[i]必须等于'\0'才符合测试条件,'\0'为第5个元素,数组下标i为4.
+    for (i = 0; cp[i] != NULL_CHAR; i++) {
+        //uli_temp = uli_temp + cp[i];
+        uli_temp += cp[i];
+    }
+    printf("length of string(exclude null character): %d\n", i);
+    result = uli_temp % i;
+    printAttribute(cp, cap);
+    printf("sum of chars:%lu; key=>hash: %lu;\n", uli_temp, result);
+    return 0;
+}
+
+int printAttribute(char *cp, char (*cap)[]) {
+    int i;
+    printf("attribute:");
+    for (i = 0; cp[i] != NULL_CHAR; i++) {
+        printf("%c", cp[i]);
+    }
+    printf("; ");
+    return 0;
+}
+
+
+
