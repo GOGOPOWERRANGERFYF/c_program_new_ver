@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #define NULL_CHAR '\0'
 // 不完整的结构声明(结构声明前置)
 struct valuenode;
@@ -62,7 +63,7 @@ int printAttribute(char *cp, char (*cap)[]) {
 
 /*
 hash table(哈希表/散列表):
- "属性名"(string) ==> key%x(例如:array_length)=key ==> array[key]值为指针 ==> 属性值
+ "属性名"(string) ==> key%x(例如:array_length)=key ==> array[key]值为指针 ==> 属性值(C语言实现:malloc分配内存创建链表节点)
         index:key     array[key]    value    p          value    p    (p:pointer)
                         +---+     +--------+---+      +--------+---+
             [key]       | p | --> |        |   | -->  |        |   |         冲突()
