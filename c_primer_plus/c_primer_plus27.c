@@ -8,6 +8,7 @@
 //  不说了...转到c_and_pointer1.c去了...
 
 #include <stdio.h>
+// struct_a为标记名,把struct struct_a作为一个类型名使用
 struct struct_a{
     char c1[10];
     float fa;
@@ -97,7 +98,27 @@ void main(void){
 // 联合(union)是一种数据类型,它能在同一个内存空间中储存不同的数据类型(不是同时储存)
 //
 
-
+// 14.11 枚举类型
+//    枚举类型(enumerated type)使用符号名称来表示整型常量。
+//    enum常量是int类型,因此,只要能使用int类型的地方就可以使用枚举类型。
+//    语法结构与结构的语法相同.
+//    enum colors {red, orange, yellow, green, blue};
+//    enum colors my_colors; 
+//    colors作为标签名(tag name),enum colors作为一个类型名使用.
+//    第一个声明枚举了enum colors类型变量可能有的值。
+//    red、yellow等这些符号常量被称为枚举符(enumerator)
+// 14.11.1 enum常量
+//    从技术层面讲,它们是int类型的常量.
+//    red为一个有名称的常量,代表整数0。
+//    其它标识符都是有名称的常量。只要有能使用整型常量的地方就可以使用枚举常量。
+// 14.11.2 默认值  
+//    上面例子中的enum colors类型的枚举列表中的常量默认被赋值0,1,2,3,4
+// 14.11.3 赋值
+//    在枚举声明中,可以为枚举常量指定整数类型值:
+//    enum levels {low = 100, medium = 500, high = 1000};
+//    如果只赋值部分枚举常量
+//    enum levels {low, medium = 500, high};
+//    结果: low = 0;  high = 5001;
 
 
 
