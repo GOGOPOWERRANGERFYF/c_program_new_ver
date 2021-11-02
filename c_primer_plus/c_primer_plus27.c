@@ -119,6 +119,9 @@ void main(void){
 //    如果只赋值部分枚举常量
 //    enum levels {low, medium = 500, high};
 //    结果: low = 0;  high = 5001;
+// 14.11.4 enum的用法
+//    字符类型指针数组,在C中,字符串就是带空字符'\0'的字符数组,字符串常量为字符数组首元素的指针
+//    char *char_pointer_array[] = {"hello", "world!", "welcome"};
 
 
 
