@@ -5,8 +5,8 @@
 */
 #include <stdio.h>
 // 继承性
-struct super_class;
-struct sub_class;
+typedef struct super_class super_class;
+typedef struct sub_class sub_class;
 typedef struct super_class {
     unsigned int id;
     // 1.函数签名知识点; 2.C声明语法中()优先级比*高
@@ -16,7 +16,8 @@ typedef struct sub_class {
     super_class super_class;
 } sub_class;
 
-sub_class * initObject(void);
+sub_class * initObjectPointer(void);
+sub_class initObject(void);
 int printObjectInfo(void);
 
 int main(void) {
@@ -25,19 +26,32 @@ int main(void) {
     // 通过函数指针调用函数(函数调用的本质)
     //subClass_object.super_class.printObjectInfo();
 
-    sub_class * sub_class_pointer;
-    sub_class_pointer = initObject();
-    sub_class_pointer->super_class.printObjectInfo();
+    sub_class * sub_class_object_pointer;
+    sub_class_object_pointer = initObjectPointer();
+    sub_class_object_pointer->super_class.printObjectInfo();
+
+    sub_class sub_class_object;
+    sub_class_object = initObject();
+    sub_class_object.super_class.printObjectInfo();
+
+    printf("%zd\n", sizeof sub_class_object);
     return 0;
 }
 
-sub_class * initObject(void) {
+sub_class * initObjectPointer(void) {
     sub_class subClass_object, *subClass_object_pointer;
     // 下面两个语句是等价的。
     //subClass_object.super_class.printObjectInfo = printObjectInfo;
     subClass_object.super_class.printObjectInfo = &printObjectInfo;
     subClass_object_pointer = &subClass_object;
     return subClass_object_pointer;
+}
+
+sub_class initObject(void) {
+    sub_class subClass_object, *subClass_object_pointer;
+    subClass_object.super_class.printObjectInfo = &printObjectInfo;
+    subClass_object_pointer = &subClass_object;
+    return subClass_object;
 }
 
 int printObjectInfo(void) {
