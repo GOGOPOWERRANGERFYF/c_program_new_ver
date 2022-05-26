@@ -128,6 +128,7 @@ void character_string(void){
         //if ((int)char_array[n] == 0) break;
     }
     printf("大肉云吞utf-8: ");
+    // 这里貌似是有问题的。。。有待再去学习理解
     for (m = 0; m < n; m++){
         printf("%hx ", char_array[m]);
     }
