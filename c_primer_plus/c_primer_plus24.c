@@ -26,6 +26,19 @@
 //  整数: 二补码 (IEEE规定的编码标准)
 //  浮点数: 就浮点数的编码啊... (IEEE规定的编码标准)
 
+/*
+    11.3 字符串输出
+        ...
+    11.3.1 puts()函数
+        ...
+    11.3.2 fputs()函数
+        ...
+    11.3.3 printf()函数
+        printf("%s\n", "string");
+
+*/
+
+
 #include <stdio.h>
 #include <stdint.h>
 #include <wchar.h>
