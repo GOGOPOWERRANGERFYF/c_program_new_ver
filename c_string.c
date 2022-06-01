@@ -4,6 +4,7 @@
 #include <locale.h>
 int charString(void);
 int wideCharString(void);
+int toHexadecimal(void);
 
 int main(void) {
 	// vim输入unicode:
@@ -14,8 +15,12 @@ int main(void) {
 	// 运行中发现C的窄字符串和宽字符串不能同时输出...
 	// 先输出一种字符串则另一种字符串无法输出...
 	
-	charString();
+	//charString();
 	//wideCharString();
+	
+	toHexadecimal();
+
+	printf("%zd\n", sizeof(*"xxx"));
 	return 0;
 }
 
@@ -37,5 +42,14 @@ int wideCharString(void) {
 	return 0;
 }
 
+int toHexadecimal(void) {
+	int i1 = 17;
+	printf("%x\n", i1);
+
+	float f1 = 1.0;
+	int * conversion_p = (int *)&f1;
+	printf("%x\n", *conversion_p);
+	return 0;
+}
 
 
