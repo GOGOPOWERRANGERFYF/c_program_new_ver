@@ -13,6 +13,8 @@
 //			词法分析
 //			语法分析
 //			生成AST 抽象语法树(abstract syntax tree)
+//			运行时环境 runtime environment RTE
+//			活动树
 //
 
 /*
