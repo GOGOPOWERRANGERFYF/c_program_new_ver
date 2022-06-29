@@ -1,8 +1,23 @@
 /*
+    !!! 可变长数组并不是C++标准的一部分???!!!
+*/
+/*
+    int func(); 函数需要不确定个数参数
+    int func(void); 函数不需要参数
+*/
+/*
     :: 作用域符号
     ::name 全局作用域(global scope)
     class::name 类作用域(class scope)
     namespace::name 命名空间作用域(namespace scope)
+
+    cout << "string"
+    cout是一个预定义的对象,
+    <<为插入操作符(插入到输出流中)
+    cout对象处理插入到输出流中的字符串。
+
+    malloc为C库函数c和c++都能用(c++为了兼容...),
+    new为C++操作符
 */
 
 /*
