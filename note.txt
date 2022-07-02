@@ -15,3 +15,19 @@
 ==>《鲸书》第5章 运行时支持
 
 ==>缓存命中率 《计算机科学速成课》高级CPU涉及
+
+==> %rbp 一般用作基址指针(Base Pointer)
+    %rsp 一般用作堆栈指针(Stack Pointer)
+    %rip 是指令指针，也称为 PC
+    CF、ZF、SF 和 OF 条件码
+
+
+    %rax 一般用作累加器(Accumulator)
+    %rbx 一般用作基址寄存器(Base)
+    %rxc 一般用来计数(Count)
+    %rdx 一般用来存放数据(Data)
+    %rsi一般用作源变址(Source Index)
+    %rdi 一般用作目标变址(DestinatinIndex)
+
+==> 双引号表示先在程序源文件所在目录查找
+    尖括号表示只在系统默认目录或者括号内的路径查找，通常用于包含系统中自带的头文件
