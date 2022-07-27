@@ -50,3 +50,50 @@ mov rsp rbp (rsp一直指向栈顶,rbp新栈底与rsp高度一致)
 
 数字电路 和 计算机组成和结构:
     学习目标:移位运算
+
+多线程
+不加锁的话,例如i++的汇编为多条指令,线程切换并不能保证这些指令完全执行完
+才切换线程上下文,因此可能会出现两次线程才执行完一条i++语句的情况.
+wsl2里有代码.
+
+终于找到了理解通用高速缓存的关键点:
+相同标记的组0,组1,组2,组3...
+不同标记的组0,组1,组2,组3...
+set id (地址中位)
+tag id (地址高位)
+word id (地址地位) (这里的1word=8bit,字节偏移)
+cache line (包括vaild、tag、block)
+
+        vaild   tag     block
+set 0     1     110     0000 0001
+          1     101     0000 0100
+
+set 1     1     110     0000 0101
+          1     101     0000 1001
+
+set 2     1     110     0000 1101
+          1     101     0000 1100
+先匹配tag,有则继续,无则等待c周期,向下一层次存储器读取;(地址高位)
+再选择set,通过set id(地址中位),有则命中;
+最后再block offset,取字节.
+
+让缓存模型印在脑子里的思路(把书本上平面图的不同set垂直堆叠起来):
+垂直平面tag,都为同一tag值,同一垂直平面的不同set,映射不同的cache line(实际是包含tag的),
+[cache line: vaild,block,tag,还有dirty]
+以上为单个set只有一个cache line的平面,那么如何实现一个set多条cache line呢,
+当然是让多个上面描述的平面并联,然后z轴方向的同一平面set为一组,每个z轴平面就可以存储多条cache line,
+注意,z轴平面的cache line的tag值与垂直平面的相反,它们的tag值都是不相同的.
+最后就是最简单的block offset选取字节.(例如通过查看我的wsl2里的kali linux,cache line的数据block为64bit,8个字节)
+
+地  址:                tag  set_index  block_offset
+缓存行: vaild (dirty)  tag  set_index  block_offset
+
+组相联高速缓存(缓存行>1)
+    一个set只有1缓存行的话,一个cache(相当于组相联高速缓存的一个子cache)同一时间只能映射一个tag块(tag值相同);
+    n个并联的子缓存,就n路(way),最简单的就是一个set有多少line就是多少路;
+    一个set包含n条cache line(缓存行),同一set不同缓存行的tag值不同,n line就n way;
+
+    x轴 cache line 缓存行的不同部分(参考上面的缓存行)
+    y轴 相同tag值的cache line(缓存行)
+    z轴 相同set值的cache line(每条cache line包含不同的tag)
+
