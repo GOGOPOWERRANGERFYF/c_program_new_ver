@@ -137,10 +137,18 @@
 // breakpoint 断点
 // gcc -g 可执行程序包含调试信息
 // (gdb) disas 函数名
-// (gdb) b *0x...   设置断点breakpointer
+// (gdb) b *0x...   设置断点breakpointer ???
+// (gdb) list 查看源代码
+// (gdb) list 源代码行数. 查看行数附近源代码
+// (gdb) b 源代码行数 设置断点
 // (gdb) r          run运行程序(从断点开始)
+// (gdb) info registers
+// (gdb) next 下一条源代码
+// (gdb) ni 下一条汇编指令
 // (gdb) p %rsp     打印寄存器存储的指针?
-//  
+// (gdb) x (exmine检查) 检查内存位置
+// step可以帮助初步揭开代码位置的谜团,例如：函数调用和函数本身可能在不同的文件中.
+// next是在单步执行时,在函数内遇到子函数时不会进入子函数内单步执行,而是将子函数整个执行完再停止,也就是把子函数整个作为一步. 
 
 // C语言的四种存储类别:
 //  1. auto     自动
