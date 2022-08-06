@@ -60,15 +60,15 @@ void * task(void * void_pointer) {
 }
 
 void * task_add_mutex_lock(void * void_pointer) {
-    pthread_mutex_lock(&lock);
     for (int i = 0; i < 1000; i++) {
+        pthread_mutex_lock(&lock);
         sum_lock++;
         // 挂起线程10微秒(千分之一毫秒)
         // 只是为了实现线程的切换?
         // usleep返回0为成功.
+        pthread_mutex_unlock(&lock);
         usleep(10);
     }
-    pthread_mutex_unlock(&lock);
     return NULL;
 }
 
