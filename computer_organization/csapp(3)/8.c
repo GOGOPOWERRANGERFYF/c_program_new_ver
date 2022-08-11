@@ -276,4 +276,36 @@
     操作系统内核使用一种称为上下文切换(context switch)的较高层形式的异常控制流来实现多任务.上下文切换机制在8.1节中
     已经讨论过的那些较低层异常机制之上的.
     内核为每个进程维持一个上下文(context).
+    ...
+
+    8.3 系统调用错误处理
+    ...
+
+    8.4 进程控制
+    Unix提供了大量从C程序中操作进程的系统调用.这一节将描述这些重要的函数,并举例说明如何使用它们.
+    8.4.1 获取进程ID
+    每个进程都有一个唯一的整数(非零)进程ID(PID).getpid函数返回调用进程的PID.getppid函数返回它的父进程的PID(创建
+    调用进程的进程).
+    #include <sys/types.h>
+    // C头文件目录/usr/include/, 本例中头文件sys文件夹路径/usr/include/x86_64-linux-gnu/sys
+    #include <unistd.h>
+    pid_t getpid(void);
+    pid_t getppid(void);    // 返回,调用者或其父进程的PID
+    getpid和getppid函数返回一个类型为pid_t的整数值,在linux系统上它在types.h中被定义为int.
+
+    8.4.2 创建和终止进程
+    从程序员的角度,我们可以认为进程总是处于下面三种状态之一:
+    *运行.进程要么在CPU上执行,要么在等待被执行且最终会被内核调度.
+    *停止.进程的执行被挂起(suspended),且不会被调度.当收到SIGSTOP、SIGTSTP、SIGTTIN或者SIGTTOU信号时,进程就停止,并且
+     保持停止直到它收到一个SIGCONT信号,在这个时刻,进程再次开始运行.(信号是一种软件中断的形式,将在8.5节中详细描述.)
+    *终止.进程永远地停止了.进程会因为三种原因终止:1)收到一个信号,该信号的默认行为是终止进程,2)从主程序返回,3)调用exit函数
+    #include <stdlib.h>
+    void exit(int status); // 该函数不返回
+    exit函数以status退出状态来终止进程(另一种设置退出状态的方法是从主程序中返回一个整数值).
+    父进程通过调用fork函数创建一个新的运行的子进程.
+    (fork 分叉; branch 分支;)
+    #include <sys/types.h>
+    #include <unistd.h>
+    pid_t fork(void);   // 返回:子进程返回0,父进程返回子进程的PID,如果出错,则为-1.
+    
 */
