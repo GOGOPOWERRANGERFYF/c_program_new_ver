@@ -20,31 +20,43 @@ int sum = 0, sum_lock = 0;
 
 // thread id: t_id
 
+// -l 链接pthread
+// gcc thread.c -l pthread
+
 int main(void) {
     printf("sizeof pthread_mutex_t variable: %zd bytes.\n", sizeof lock);
 
-    pthread_t pthread1, pthread2, pthread3, pthread4;
+    pthread_t pthread1, pthread2, pthread3, pthread4, pthread5, pthread6;
     void * task_return1, *task_return2;
-    // arg1: 指向线程标识符的指针
-    // arg2: 线程属性,如果默认,则传入NULL
-    // arg3: 线程运行函数的地址,即函数指针(c函数名就为函数指针)
+    /*
+    // arg1: 指向线程(标识符)的指针,(restrict:限定,限定线程的指针)
+    // arg2: 线程属性(指针),如果默认,则传入NULL
+    // arg3: 线程运行函数的地址,即函数指针(c函数名就为函数指针); 开始例程(start routine)
     // arg4: 传入运行(线程)函数的参数
     pthread_create(&pthread1, NULL, task, NULL);
     pthread_create(&pthread2, NULL, task, NULL);
+    pthread_join(pthread1, NULL);
+    pthread_join(pthread2, NULL);
+    printf("%d\n", sum);
+
     // arg1: 线程标识符,线程ID
     // arg2: 存储以不同方式结束的线程(函数)的返回值,没兴趣知道的可直接传NULL
     //       传入NULL,该参数就不存储被等待线程(函数)的返回值
     // 以阻塞的方式等待一个线程结束
     // join 加入;并集
-    pthread_join(pthread1, NULL);
-    pthread_join(pthread2, NULL);
-    printf("%d\n", sum);
-
     pthread_create(&pthread3, NULL, task_add_mutex_lock, NULL);
     pthread_create(&pthread4, NULL, task_add_mutex_lock, NULL);
-    pthread_join(pthread1, NULL);
-    pthread_join(pthread2, NULL);
+    pthread_join(pthread3, NULL);
+    pthread_join(pthread4, NULL);
     printf("%d\n", sum_lock);
+    */
+
+    pthread_create(&pthread5, NULL, task, NULL);
+    // 阻塞其他线程,等待线程5结束?
+    pthread_join(pthread5, NULL);
+    pthread_create(&pthread6, NULL, task, NULL);
+    pthread_join(pthread6, NULL);
+    printf("%d\n", sum);
     return 0;
 }
 

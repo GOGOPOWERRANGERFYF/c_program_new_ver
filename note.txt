@@ -86,8 +86,10 @@ set 2     1     110     0000 1101
 最后就是最简单的block offset选取字节.(例如通过查看我的wsl2里的kali linux,cache line的数据block为64bit,8个字节)
 本质就是多个子缓存映射多个内存tag块.
 
+                      高位   中位(组)   低位(块,字节)
 地  址:                tag  set_index  block_offset
 缓存行: vaild (dirty)  tag  set_index  block_offset
+8 ways 8个tag(高位),中位表示每个tag的set数量
 
 组相联高速缓存(缓存行>1)
     一个set只有1缓存行的话,一个cache(相当于组相联高速缓存的一个子cache)同一时间只能映射一个tag块(tag值相同);
@@ -176,8 +178,17 @@ top:
     异常表其实就是中断向量表?
     个人猜测的gdb原理:通过访问用户进程触发异常(通过设置的断点<陷阱/系统调用/异常指令>?)后的栈和状态,这个栈和状态信息数据应该是
     储存在内核栈中,仅为个人目前的猜测...
+    抢占式多任务操作系统
 
 知识点学习目标:
     MMU;
     底层I/O 标准I/O
-    switch case 
+    有限状态自动机和行为树
+
+    c++部分: 
+        1. inline内联函数 c primer plus 第16章
+        2. c++ 引用 int i = 5;int &r = i; <c++程序设计语言> 5.5节
+        3. <c++程序设计语言> 4.9.6 对象和左值
+                一个引用就是某个对象的另一个名字.
+        4. c++ 引用变量 <c++ primer plus 第6版> 8.2节
+

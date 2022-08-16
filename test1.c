@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 
 int main(void) {
     pid_t pid = getpid();
@@ -16,26 +18,39 @@ int main(void) {
     //printf("子进程结束? %d\n", child_pid_and_child_p_return);
     //printf("after %d\n\n", child_pid_and_child_p_return);
 
+    // 时间
+    clock_t start1, finish1, start2, finish2;
+    double time1, time2;
+
     // 重点:父进程和子进程的并发,进程的时间片由内核调度器分配,
     // 输出结果随机
     if (child_pid_and_child_p_return == 0) {
-        printf("子进程:%d 开始执行...\n", getpid());
-        for (int i = 0; i < 10; i++) {
-            printf("这人是个大傻子!\n");
+        start1 = clock();
+        printf("子进程:%d 开始执行==>\n", getpid());
+        for (int i = 0; i < 1000000; i++) {
+            if (i % 100000 == 0) printf("子进程执行循环中...100000次\n");
         }
         printf("子进程:%d 结束...\n", getpid());
+        finish1 = clock();
+        time1 = (double)(finish1 - start1) / CLOCKS_PER_SEC;
+        printf("time: %fs\n", time1);
         exit(0);
     }
+    // 等待子进程结束,才开始执行之后的代码
+    waitpid(child_pid_and_child_p_return, NULL, 0);
 
     if (child_pid_and_child_p_return != 0) {
-        printf("父进程:%d 开始执行...\n", getpid());
-        for (int i = 0; i < 10; i++) {
-            printf("这人是个大聪明!\n");
+        start2 = clock();
+        printf("父进程:%d 开始执行==>\n", getpid());
+        for (int i = 0; i < 1000000; i++) {
+            if (i % 100000 == 0) printf("父进程执行循环中...100000次\n");
         }
         printf("父进程:%d 结束...\n", getpid());
+        finish2 = clock();
+        time2 = (double)(finish2 - start2) / CLOCKS_PER_SEC;
+        printf("time: %fs\n", time2);
         exit(0);
     }
-    //return 5;
 }
 
 
