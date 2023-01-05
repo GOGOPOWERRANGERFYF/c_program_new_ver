@@ -13,6 +13,10 @@ int main(void) {
     pid_t current_pid;
     // 子进程返回0;父进程返回子进程的PID;
     printf("fork开始创建子进程==============>\n");
+    // fork执行时,会有两个返回值,一个是父进程的返回值,一个是子进程的返回值.
+    // 1)在父进程中,fork返回新创建子进程的进程ID;
+    // 2)在子进程中,fork返回0;
+    // 3)fork失败,返回一个负值-1;
     pid_t child_pid_and_child_p_return = fork();
     //printf("%d\n", child_pid_and_child_p_return);
     //printf("子进程结束? %d\n", child_pid_and_child_p_return);
@@ -52,7 +56,6 @@ int main(void) {
         exit(0);
     }
 }
-
 
 //int main(void) {
 //    char c = 0b10001000, temp;

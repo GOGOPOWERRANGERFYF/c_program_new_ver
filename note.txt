@@ -172,12 +172,27 @@ top:
 ...     | 常驻内存  |                 |常驻内存|            ... 物理内存
     +---------------------------------------------------+
 
+cpu pipeline 中央处理器流水线
+IF instruction fetch 取指令
+ID instruction decode 译码(指令码)
+EX execute 执行
+MEM memory access 内存访问
+WB write back 写回
+
+spin (使)快速旋转
+mutex (mutual exclusion)
+
+vim快捷键:
+   n(行数,字母数)+ j,k,h,l 上下左右 
 
 备忘录:
     #include <stdio.h> 用的是相对路径
     #include "xxx.h" 同一文件夹中的头文件
     系统头文件目录: /usr/include/
     以前的sys/现在为x86_64-linux-gun
+
+    异常:
+        异常号 (exception number)
 
 猜测和疑问(待验证):
     linux的shell通过异常/陷阱和内核交互?

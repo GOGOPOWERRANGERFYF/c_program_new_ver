@@ -56,6 +56,24 @@ int main(void) {
     pthread_join(pthread5, NULL);
     pthread_create(&pthread6, NULL, task, NULL);
     pthread_join(pthread6, NULL);
+    /*
+        pthread_join()的形象理解,
+            |
+            |
+            +--------+
+            |        |        
+     主线程  |        | 子线程
+            |        |        
+            |        +
+          join()    /
+            |      /
+     join   +-----+
+            |
+            |
+
+    join 合并,集合
+    join() 等待子线程结束
+    */
     printf("%d\n", sum);
     return 0;
 }
