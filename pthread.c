@@ -60,14 +60,14 @@ int main(void) {
         pthread_join()的形象理解,
             |
             |
-            +--------+
+     create +--------+ pthread_create()
             |        |        
      主线程  |        | 子线程
             |        |        
             |        +
-          join()    /
+            |       /
             |      /
-     join   +-----+
+     join   +-----+ pthread_join()
             |
             |
 
