@@ -307,5 +307,10 @@
     #include <sys/types.h>
     #include <unistd.h>
     pid_t fork(void);   // 返回:子进程返回0,父进程返回子进程的PID,如果出错,则为-1.
+
+    ...
+
+    8.5 信号
+        。。。
     
 */
