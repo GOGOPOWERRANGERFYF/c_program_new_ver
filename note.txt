@@ -275,3 +275,14 @@ switch (expression) {
         statement;
         return;
 }
+
+book为标签
+struct book {
+    unsigned int id;
+    char * name;
+}
+struct book haha 声明结构体变量
+
+season为标记,符号常量spring为枚举符(int类型常量)
+enum season { spring, ... }
+enum season s 声明枚举类型变量
