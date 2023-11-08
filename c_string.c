@@ -6,6 +6,8 @@ int charString(void);
 int wideCharString(void);
 int toHexadecimal(void);
 
+// wide character 宽字符
+// 
 int main(void) {
 	// vim输入unicode:
 	//	insert模式下ctrl+v
@@ -14,11 +16,14 @@ int main(void) {
 	
 	// 运行中发现C的窄字符串和宽字符串不能同时输出...
 	// 先输出一种字符串则另一种字符串无法输出...
+	// 本质：setlocale(LC_ALL, "zh_CN.UTF-8")后,
+	// 不能再使用窄字符和窄字符的输出和输入方法,要使用宽字符和宽字符的输出和输入方法
 	
-	//charString();
+	charString();
 	//wideCharString();
 	
 	toHexadecimal();
+	wideCharString();
 
 	printf("%zd\n", sizeof(*"xxx"));
 	return 0;
