@@ -1,6 +1,3 @@
-import imp
-
-
 '''
     SQL structure query language 结构化查询语言
     database 数据库
