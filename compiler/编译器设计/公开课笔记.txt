@@ -1,0 +1,57 @@
+笔记：
+
+P1:
+编译器会用多种中间表示(intermediate representation),抽象语法树只是其中一种.
+instruction 指示；(计算机的)指令.
+semantic analysis 语义分析 或 (context-sensitive analysis 上下文相关分析)
+
+一个优化编译器:
+  front end 前端:
+    letter 字母
+    word 单词,字
+    sentence 句子
+    编译器scanning阶段：taking letters and forming word
+    编译器parsing阶段：taking words and forming sentences
+    编译器semantic analysis阶段：taking sentences and forming a tree
+      |
+      V
+    IR (intermediate representation) 中间表示
+      |
+      V
+  optimizer 优化器: 
+    code optimization
+      |
+      V
+  back end 后端:
+    编译器code generation阶段：taking tree and generating code
+    basic code generation
+    instruction selection
+    register allocation
+    instruction scheduling
+
+理论基础:
+csc 135
+finite automata
+regular expression
+grammar
+
+
+P2:
+phase 阶段
+
+three main phase or component of an optimizing compiler:
+note: difference compiler have difference desings,并不意味着必须这样.
+conceptual view(概念视图):
+  the high-level representation (the source code)
+
+      |
+      V
+  [front end]
+      |
+      V
+  [optimizer]
+      |
+      V
+  [back end]
+      |
+      V

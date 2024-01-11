@@ -99,7 +99,7 @@ void main(void){
 //
 
 // 14.11 枚举类型
-//    枚举类型(enumerated type)使用符号名称来表示整型常量。
+//    枚举类型(enumerated type)使用符号名称(symbolic names)来表示整型常量。
 //    enum常量是int类型,因此,只要能使用int类型的地方就可以使用枚举类型。
 //    语法结构与结构的语法相同.
 //    enum colors {red, orange, yellow, green, blue};
