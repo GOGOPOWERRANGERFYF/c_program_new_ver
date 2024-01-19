@@ -7,9 +7,9 @@ semantic analysis 语义分析 或 (context-sensitive analysis 上下文相关�
 
 一个优化编译器:
   front end 前端:
-    letter 字母
-    word 单词,字
-    sentence 句子
+    letter 字母; character 字符;
+    word 单词,字;
+    sentence 句子;
     编译器scanning阶段：taking letters and forming word
     编译器parsing阶段：taking words and forming sentences
     编译器semantic analysis阶段：taking sentences and forming a tree
@@ -22,7 +22,7 @@ semantic analysis 语义分析 或 (context-sensitive analysis 上下文相关�
     code optimization
       |
       V
-  back end 后端:
+  backend 后端:
     编译器code generation阶段：taking tree and generating code
     basic code generation
     instruction selection
@@ -36,22 +36,818 @@ regular expression
 grammar
 
 
-P2:
+### Lecture 1: Compiler Overview(1) Structure & Major components
+P2 (does, not how to does):
+variable n. 变量；adj. 可变的；
+statement (文字)陈述
 phase 阶段
+certain adj. 确定的；
+intermediate adj.中间的;(两地、两物、两种状态等)之间的;
 
 three main phase or component of an optimizing compiler:
 note: difference compiler have difference desings,并不意味着必须这样.
+
+An intermediate format or an intermediate representation
+(AST) abstract syntax tree is one of the intermediate representations that compilers use,
+a single compiler may use mutiple intermediate representations to represent the code and
+to do the code generation process.
+the code generation process is going from a high level language to machine language.
+and compiler don't do this in one step, so there are multiple steps and phases that are 
+involved to get from high level to assembly code.
+
 conceptual view(概念视图):
   the high-level representation (the source code)
 
+  x = a + b -> [front end] -(AST)-> [optimizer] -> [backend]
+
+  load a -> r1
+  load b -> r2
+  add r1, r2 -> r3
+  store r3 -> x
+  note: real assembly doesn't have variable names/doesn't have symbolic information
+  once the compiler forms the abstract syntax tree, it no longer needs the symbolic information,
+  in theory once the compiler constructs this abstract syntax tree, it no longer needs to keep the
+  symbolic information, like the variable name. But in practice(实践), there are reasons for keeping
+  symbolic information throughout the entire compilation process.
+    * resons -> for debugging purposes
+  for each variable, which in fact becomes a node in this tree, it will keep the symbolic information,
+  the corresponding(adj. 相应的) variable names, so that it can implement the debugging functionality.
+  But without that, we don't need it. in other words, if you just want to generate code, once you build
+  a tree like this you don't need the symbolic information.
+    (AST):
+         = assignment operation
+        / \
+       x   + addition operation  
+          / \
+         a   b
+
+  0xff...
+  |   |
+  +---+ certain base, the base is the base address of the stack, a pointer to the activation record.
+  | c |
+  +---+
+  | b |
+  +---+
+  | a |
+  +---+
+  |   |
+  0x00...
+
+  a,b,x -> symbolic information
+  frame or activation record
+  the frame for that particular program (该程序的帧)
+  the stack frame for that (特定函数)particular function 
+  symbolic information -> implement and debug
+
+
+  ***注意：编程语言并不是自然语言,所以很多自然语言的概念并不直接适用/对等,只是作为辅助理解。例如下面两个:
+  part of speech(演讲): 词性，词类 -> 个人理解：词的性质，词的分类；parts of speech为复数形式...;
+  sentence 句子;
+
+  编程语言中使用:
+  token的类型(我自己琢磨的,以后还要完善和修改的)?
+  statement 语句;
+
+  semicolon 分号；
+
+scanner(扫描器) or lexer(词法分析器):
+  [front end] 
+  [  scanning  ]
+  [  (lexing)  ]
+  it's a low level analysis of the input program.
+  you can view the whole program as one big string.(vt.把...视为)
+  It will look at it as a string that consists of these characters and it will divide it up
+  into tokens or lexemes. -> to be specific(具体来说) -> 
+    x12 = a3 + b45;
+  what the scanner does?
+  it will identify the difference tokens, the difference words that this string consists of.
+  x12 is the first token or lexeme.
+  equal is the second token.
+  question: how did it know that? How did it know that this point is the end of the first token
+  and the start of the next token?
+  (了解:编程语言要求空格让开发编译器的工作更容易,但让程序员工作更难.
+        looking for special symbols or characters, that mean certain things, for example the equal sign,
+        it's reserved for assignment operator, Yes, So this is reserved, but how did it know that this
+        equal sign is not part of the variable name? Because only letters and numbers are valid variable,
+        name, So when it sees equal or a space, that's the end of the variable name.
+  )
+  It knew that this is the end of this based on a certain rule.
+  we will be studying these rules. And these rules, as we will see, will be defines in the form of
+  regular expression. So there is a regular expression that defines what a variable name may consist
+  of. that tool(scanner/lexer) does not allow an equal sign in the variable name. So letters and numbers
+  are allowed in variable name. So it knew that these three characters constitute(vt.组成) one token which
+  is a variable name, but this(等于号) does not belong to that variable name, so this must belong to a differenced
+  token. And there is no other part of speech in the programming language that starts with an equal sign. So
+  it identified this equal sign, the operator, as a token by itself. There is no part of speech in a programming
+  language, there is no rule that says that has something which starts with an equal sign. So it knew that 
+  this is the end of this token. and this is can not be, for example:
+    equal a 3 can not be a token by itself.
+    =a3 This is not a valid token because there is no rule.
+    So in order for the compiler to recognize this, it has to have certain rules that define, what the parts of
+    speech of this language are, what the words are.
+
+    x12
+    =
+    a3
+    +
+    b45
+    ;
+  what the scanner or lexer does. How does it do that? We will be studying this later.
+  We will define this using regular expressions and the implementation(实现,完成) will require using
+  finite state automata. So this is what the scan.
+
+
+parser:  
+  [front end] 
+  [  scanning              ]
+  [  (lexing)              ]
+  [  parsing               ]
+  [  (syntactic analysis)  ]
+  Parsing it basically builds words. It builds sentences out of words.(它造出句子 由 单词.)
+  So the scanner produces a bunch(束,堆) of words and the scanner takes these words and tries
+  to build sentences out of these words.
+  In a regular human language we talk about the sentence. The equivalent of this in a programming language
+  is statement. And the equivalent of the word is the token or lexeme.
+  human language       programming language
+  word                 token
+  sentence             statement
+  So the tokens can be viewed as words and statements can be viewed as sentences.
+  The scanner or the lexical analyzer divided this(source code) up into these tokens.
+    x12=a3+b45;
+  (x12): So the first token is in a variable name or an identifier.
+  (=): This is equal.
+  (a3): This is another identifier or a variable name. 
+  Identifier is the name of a variable or  a name of function,  plus another identifier,
+  plus the semicolon, the end of statement.
+  So the scanner said, okay we have an identifier equals an identifier plus another identifier.
+  Is there a rule in the language that allows us to bulid a sentense, a valid sentence?
+  Well, in the languages that you are familiar(熟悉) with there is a rule where this identifier(x12) on the left
+  is the identifier that we are assign to. And whatever appears on the right is the expression. So we
+  are computing an expression and we are assigning an expression to an identifier, the left hand side of this 
+  assignment statement. So in this case, you know, if there is a rule that says that you can have this, this
+  would be a valid statement in the programming language, just, you know, a valid sentense in a human language.
+  Right? Now these rules, how do you think these rules are defined in the construction of compilers?
+  >> As a grammar.
+  So a grammar is a rule that we will be using to define, the syntax of the different legal(合法的) statements
+  in a programming language. So there will be a rule that will tell us that you can assign an expression to an
+  identifier. But if we have something like, for example, 
+    x = a + b */;
+  x equal a plus b times divide something like this, there will be no rule in the programming language, in the
+  grammars for this programming language. There will be no rule that will not alllow you to have an expression
+  that consists of a plus b times multiply(v.乘) and nothing. So this is an invalid statement syntactically.
+  How do we define what is valid and what's invalid? By defining the right grammars. So this is one of the main
+  concepts in this course. This is going to be one of the main concepts, how to write the right grammars, to define
+  the syntax of a programming language. So we will have a rule that will say this is good syntax. This is valid.
+    x12=a3+b45;   (This is valid)
+    identifier = identifier + identifier;
+                      [expression]
+    x = a + b */; (This is syntax error) <附加:个人理解...暂时还没想好,之后补充>
+    Because this doesn't match any of the rules, any of the rules in the grammar that define this languege.
+    重点:
+    Okay? Any questions on this?
+    Okay. So basically scanners are build using regular expressions and finite automata and parsers are built
+    using grammars.
+    So we will be studying difference algorithms for doing parsing. Parsing is one of the central topics in this
+    course and in compiler construction.
+    >>Okay? Any questions on this?
+
+    >>Okay. Now the third part of the front end of the compiler is the semantic analyzer.
+  
+  semantic analyzer:
+    [front end] 
+    [  1.scanning              ]
+    [    (lexing)              ]
+    [  2.parsing               ]
+    [    (syntactic analysis)  ]
+    [  3.semantic analysis     ]
+  Now, just like in human language, a sentence may be grammatically correct, but meaningless. You know, like
+  saying the room drives the car. So when you say room drives the car, grammatically this is correct. This is
+  correct syntax. But semantically this is meaningless. And in programming language, it's the same. So, you know,
+  if we remove this bad stuff here, 
+    x = a + b;
+  this is valid statement, This is a simple expression assigned to a variable. So this is a valid statement, but
+  int fact, it will only be valid if there types, if the types of these variables are consistent(符合的).
+    x = a + b;
+  So if we have integer a, b, x, all of them are integers.
+    int a, b, x;
+  then this is perfectly meaningful. Right? But if instead of having them integers, you know, 
+  we have, you know, x is an object, a is an object of class student and b is an object of class car, and x is an
+  integer.
+    Student a;
+    Car b;
+    int x;
+  So in this case, the types are not matching. They are not consistent and this is meaningless unless you have
+  int you language, you are defining what it means to add a student and a car. And then what does it mean to 
+  assign this to an integer? So here the types do not match, which means that this statement is syntactically 
+  correct, but semantically it's not meaningful, doesn't have any meaning, which means that the compiler will
+  not know how to generate code for this. So the compiler can generate code only for meaningful statements. If
+  the statement is meaningless, it will not be able to generate code for it. So this is what compilers do in the
+  semantic analysis phase, which follows the parsing. 
+  So if you program passes scanning, it means that all the tokens, all the parts of speech are correct.
+  If it passes parsing, it means that it's syntactically correct, but we haven't yet checked if the semantics are
+  good or not. Then only after it passes semantic analysis, it will be a valid program. 
+  An important part of semantic analysis is making sure that the types match. 
+  And as you can see, parsing or checking syntax, can be done locally(adj.局部的). So we just look at this and match
+  it up with one of the rules in grammar that defines the language. But in order to check semantic, we have to do a
+  deeper and a more global kind of analysis. So we have to link, this assignment statement with these declarations.
+    Student a;
+    Car b;
+    int x;
+  which may have appeared much earlier in the code. So we have to link something that got declared at some point. And
+  between this declaration and this statement, we may have a whole bunch of code.  
+    Student a;
+    Car b;
+    int x;
+    ... a whole bunch of code...
+    x = a + b;
+  Right? So now the compiler needs to link to find for each variable that is used here the corresponding type.
+  (英文温习...动词+ed,过去时或被动式) And in order for compilers to do this, when they process a declaration, they're
+  going to create an entry(n.条目) for each variable in what we call the symol table. So there is a symbol table. So these 
+  declarations go into the symbol table. 
+    Student a; \
+    Car b;      + --> symbol table
+    int x;     /
+  So that symbol table is going to have information about each declared variable, its(pron.它的 it的所有格) type, its scope, 
+  all the difference information that the compiler needs. And then when this variable is used, the compiler is going to
+  look up that variable in the symbol table and see what type of variable that is. And based on those types, it will be 
+  able to dicide whether this statement is semantically correct or not, whether this statement is meaningful or not.
+  we will spend more than half the time in this course, doing this, studying algorithms for doing this, the frond end.
+    x = a + b (this(1))
+        |
+        V
+    [front end] 
+    [  1.scanning              ]
+    [    (lexing)              ]
+    [  2.parsing               ] --+--> [optimizer] --> [backend] --> 
+    [    (syntactic analysis)  ]   |
+    [  3.semantic analysis     ]   |
+                                   V (this(2))
+                                assign
+                                /    \
+                               x      +
+                                    /   \
+                                    a    b
+  So the frond end takes this(1) and gives us this(2). And of course it will gives us an abstract syntax tree only if
+  the program passes all there phases.
+  If the scanning is correct, if it passes scanning, if it passes parsing, if it passes semantic analysis.
+  If it fails one of them, you will get an error message. The compiler is going to generate an error message.
+
+
+Question: So now what does the compiler do in the optimization phase?
+    x = a + b (this(1))
+        |
+        V
+    [front end] 
+    [  1.scanning              ]
+    [    (lexing)              ]          <here(1)>      <here(2)>
+    [  2.parsing               ] --+--> [optimizer] --> [backend] --> 
+    [    (syntactic analysis)  ]   |
+    [  3.semantic analysis     ]   |
+                                   V (this(2))
+                                assign
+                                /    \
+                               x      +
+                                    /   \
+                                    a    b
+Now here(1) we are in the intermediate level. We have the code represented as abstract syntax tree or some other intermediate 
+representation. By the way, the abstract tree is not the only intermediate representation.
+Sometimes some compiler will convert the abstract syntax tree into some linear intermediate representation.
+Compiler vary(v.变更) in the intermediate(adj.中间的,之间的) representations that they use.
+
+Okay, Now in the optimization phase, the compiler be applying some transformations(n.转变) to improve the quality of the code, 
+but in theory the optimization that are applied here(1) or the transformations that are applied here(1), they should be machine 
+independent. So they are independent of the target machine that we are generating code for.  
+So everything that is machine specific(adj.特定的,具体的,明确的,独特的), that is specific to the machine that we are trying to generate 
+code for, should be ideally(adv.最适合地) done here(2).(这机器翻译翻得还不错,直接采用了...因此，所有特定于机器的，特定于我们试图为其生成代码的机器
+的，都应该在这里完成.) And I say ideally because sometimes some machine specific stuff ends up(最终) being here(1).(机器翻译：我说这是理想的，
+因为有时一些特定于机器的东西最终会出现在这里) But ideally this should be machine independent. Okay, maybe I should note here(2) that many 
+compilers generate code for multiple machines, for multiple processors, multiple targets. So the extreme(n.极端;adj.极端的) example is GCC.
+The GCC compiler, it generates code for many many difference machines and many many difference processors. So it's one compiler that 
+generates code for many difference processors, which means that the backend is complicated(adj.复杂的,难懂的). Or you can think of it, 
+for a good design there will be multiple backends or this backend will be organized in a way in which we have some common stuff that 
+applies to all machines, to all processors and then some processor secific stuff. So you may look at, the backend may be divided into 
+abstract or general stuff that applies to all processors.  
+  [backend]
+  [   abstract          ]
+  [----+----+----+------]
+  [ T1 | T2 | T3 |...   ]
+And then this is specific to target number one(T1). This is specific to target number two(T2). This is specific to target number three. 
+And so forth. So these targets are target processors, for exmaple, Intel X86 is a target, ARM architecture is a target, GPU is a target,
+imbedded processors, many many different(adj.不同的) kinds of processors. Okay. So here in the optimizer, I will just give an example of 
+an optimization that is done here, one of the common optimizations. And this common optimization is called common subexpression 
+elimination(n.消除). And I will just illustrate(vt.说明;(用示例,图画等)解释) this by example. 
+  Common subexpression elimination (CSE)
+  x = a + b + c;
+  y = d/(a + b);
+So if we have something like x equals a plus b plus c and y equals d divided by a plus b. So now given the name common subexpression 
+elimination, what transformation do you think a compiler may apply on these two statements to make them, to make the code hopefully 
+more efficient?  
+>> A plus B is common between the two of them. 
+>> Okay. So given the name, common subexpression elimination, 
+a plus b is a common subexpression, right? 
+So a compiler may do this. 
+  x = a + b + c;
+  y = d / (a + b);
       |
+      | CSE
+      | 
       V
-  [front end]
-      |
-      V
-  [optimizer]
-      |
-      V
-  [back end]
-      |
-      V
+    <transformation...>
+  t = a + b; <temporary(0)>                   --+
+  <between(1): 假设这里有 a bunch of code...>     | 
+  x = t + c;  <here(1)>                          | <a long time(1)>
+  <between(2)>                                   |
+  y = d / t;  <here(2)>                       --+
+So common subexpression elimination will just compute a plus b and put it in some temporary(adj.临时的;n.临时工). 
+And again, don't worry about the syntax here. This is conceptual(adj.概念(上)的). This is the conceptual presentation(展示).
+t equals a plus b. x equals t plus c and y equals what?
+It equals d divided by t. So this is a transformation that may make the code faster.
+This will not necessarily(adv.必然地) make the code faster. Generally speaking, there is no compiler optimization. There is no 
+transformation that the compiler applies that is guaranteed(adj.必然的;v.保证) 100% to make things faster, because it may make 
+things better from one aspect(n.方面,层面), but it may make something else worse. So in the case, for example, this will not 
+necessarily improve the code because, sometimes it's, recomputing the subexpression maybe faster than, here(1), for example, 
+loading this from memory. So this will improve performance assuming that (this?) t, this temporary(1) that holds a plus b, that 
+t will in a register, not in memory. If this t is going to be in memory and we are going to load it here(1) and load it here(2), 
+loading it from memory, loading from memory if it's not in the cache, in orders of magnitude slower that recomputing a plus b. 
+a plus b is just an add operation that can be computed in a single cycle. But if we have to load this t from memory, well it's 
+unlikely here because it's going to be in the cache, right, assuming that this will immediately follow this. So this T is going 
+to be in the cache. But if we have a bunch of code in between(1), then this t may not be in the cache and we may have to bring 
+it from main memory. Definitely(adv.肯定,明确地) if this(here(1)的t) is in main memory, this transformation will make things worse.
+But even if this(here(1)的t) is in the cache, bringing this from the chache may take more time than recomputing a plus b. And even 
+if it's in the storage(n.存储) location that is faster that the cache, which is what? What's the storage location that is faster 
+than the chache? 
+>> The register.
+Even if it's in the register, so if it's in the register here, yes, this will work well, but this will require this t(在temporary(0))
+to be reserving a register for a long time<a long time(1)>. And with this variable<t in temporary(0)> reserving a register for a long 
+time, other variables may not have the chance to be stored in a register. So when this variable<t in temporary(0)> takes this register   
+for this many instruction because we may have some instructions in between here<between(1)和(2)>, right? So keeping t in a register for 
+this long time<a long time(1)>, this is reserving a precious(adj.宝贵的) resource, which is the register, which means that some other 
+variables may not get to be in a register, so they will be in memory and there will be a slowness when using those other variables. So 
+we victimized(v.使受害) other variables. So just, the point here is that any optimization, any transformation, I hate to say optimization 
+because it's not guaranteed to make things even better, not to mention optimally. It's not even guaranteed to make things better. It 
+could make things worse. But compilers do optimizations in the hope that they will make things better.  
+You Know, in a good optimizing compiler, compiler optimizations make things better most of the time. Okay? So this is only one example 
+of those transformations that are implemented in the optimizer, in the optimization phase. This is just one example, just to give you 
+an idea. And the point here is that this kind of transformation, even(adv.甚至) though(conj.即使) it appears to be machine independent, 
+So in principle it's machine independent, but if you think about it deeply, it will not be 100% machine independent. 
+Because when you start talking about memory, caching, registers, whether this<transformation> will be good or bad will depend on how 
+much cache we have, how many registers do we have, and parameters(n.参数;决定因素) like this.
+That's why in a real compiler, in this middle optimizer, even though it's supposed to(v.应该) be machine independent, you will often 
+find some machine dependent parameters. for example, 
+common subexpression elimination is an optimization that requires variable to stay in registers for a long time and this will 
+beneficial(adj.有利的) if you have enough registers. So on a machine that doesn't have very many registers, this may not be a 
+good optimization. Okay? 
+
+
+backend后端:
+Now, the backend is the part that is truly machine dependent. 
+It's the part in which we do instruction selection and instruction scheduling and register allocation.
+    x = a + b
+        |
+        V
+    [front end]                                         [backend]
+    [  1.scanning              ]                        [instruction selection  ]
+    [    (lexing)              ]                        [instruction scheduling ]
+    [  2.parsing               ] --+--> [optimizer] --> [registers allocation   ]--> 
+    [    (syntactic analysis)  ]   |                    [                       ]
+    [  3.semantic analysis     ]   |
+                                   V 
+                                assign
+                                /    \
+                               x      +
+                                    /   \
+                                    a    b
+So today I will just in the remaining(adj.剩下的) ten minutes I will give a brief overview of these, but in fact these are,
+we'll spend two or three more lectures on these trying to understand, well at least three more lectures, trying to understand,
+what these<backend?> compiler optimizations do. 
+
+So instruction selection is selecting instructions. 
+So to go from an abstract syntax tree assembly(n.), maybe let's write an expression that is more interestiong. 
+So let's write a more interesting example like x equals a times b plus c times d. 
+  x = a * b + c * d;
+And in this case, the abstract syntax tree is going to be this, 
+  AST
+      assign
+     /       \
+    x         +
+            /   \
+           *     *
+          / \   /  \
+          a  b  c   d
+a mutiplied with b. And c mutiplied with d, add these.  
+So the abstract syntax tree is very logical, a logical, hierarchical representation of this expression computation and 
+assignment.  
+and then we are assigning this to x.
+
+Now the assembly for this is going to be loading, 
+  load
+well, what kind of assembly? That's going to depend on the machine.
+So it's common to first generate some abstract assembly, some generic assembly like, the assembly  
+for some risk(risc?) machine because risk(risc?) machine do not have very many instructions. So you are generating 
+basic assembly. 
+That(load) is the instructions you are using likely(adj.可能的) to be almost on all processors. All processors will
+have a load and an add. So using the basic operations, loading a into register r1, loading b into register r2, then 
+multiplying what? r1 and r2 and putting the reult in r3 and then loading c into register r4 and loading d into register r5.
+then multiplying r4 and r5. And putting it in r6. Then, adding r3 and r6. Putting it into r7. Storing r7 into x.
+  load a -> r1  (r1-r7: virtual registers)
+  load b -> r2
+  mult r1, r2 -> r3
+  load c -> r4
+  load d -> r5
+  mult r4, r5 -> r6
+  add r3, r6 -> r7
+  store r7 -> x
+The first observation(n.观察) here is that we are assuming that we have as many registers we want.
+So this is obviously a nonrealistic assumption.
+So we are just taking the liberty(n.自由;许可证) to use as many registers as we want and compiler do this 
+at some point before they get to(取得?) register allocation. So before they get to register allocation, before
+it gets to reigster allocation, the compiler assumes that it has an infinite number of registers, which 
+is obviously not true. There is no machine that has an infinite number of registers. The job of the register 
+allocator is to take these registers here,these virtual registers. So these virtual registers. They are not 
+real yet. They are not real registers yet. So the job of the register allocator is to take these virtual registers 
+and map them into real registers or physical registers. 
+Okay? And of course we'll say more about register allocation in the next lecture.
+So register allocation is something that we need to understand. We need to understand the problem of register allocation. 
+So this is one observation. So this is something that is done in the backend, mapping virtual registers into physical 
+registers.  
+Okay. So another observation is that, here we are generating this code sequence multiplying, 
+loading a into a register,
+loading b into a register,
+then multiplying the registers.
+But on some machines, there are complex instructions that may operate on memory operators. In fact, if you have 
+a memory operation and a multiply operation that, multiplies a and b, which are memory locations, memory addresses,
+  mult a, b 
+and putting that in could be in memory and it could be in a register.  
+So on ??? machine, you may have other options. 
+You can replace this sequence of three instructions, load, load, and multiply, with one instruction that 
+operates directly on memory operands. 
+And maybe put this in r1. 
+  mult a, b -> r1
+In fact, the machine may have an arithmetic operation that takes two memory operands and puts the result in a memory 
+operand. And that's a ??? instruction, a complex instruction, that in the machine itself consists of multiple 
+risk(risc 字幕是不是错了?是否其实是risc:精简指令集计算机) simple instructions. 
+  附加:
+      ==> 精简指令集计算机(RISC:Reduced Instruction Set Computer);
+      ==> 复杂指令集计算机(CISC: Complex Instruction Set Computer);
+Okay. So what's the point here?
+The point here is that which instruction will get selected and what's the most efficient sequence of 
+instuction is the job of which phase do you think? 
+Which phase does this? Yeah. So this instruction selection does just that. 
+  [backend]
+  [instruction selection  ] <---- 
+  [instruction scheduling ]
+  [registers allocation   ]
+It selects the best sequence of instructions for this, intermediate representation(abstract assembly).
+So you can think of the abstract syntax tree as a high level intermediate representation.
+  (risc?)
+  load a -> r1  (virtual registers) -+
+  load b -> r2                       |-> mult a, b -> r1 (cisc?)
+  mult r1, r2 -> r3                 -+
+This abstract assembly as a lower level intermediate representation, which is not quite machine code yet(还不是完全的机器代码),
+but when it goes through instruction selection, instruction selection will select real instructions, actual instructions.
+So as you can see, we are making things more real. we start with virtual and abstract things and little 
+by little, gradually(adv.逐渐地) we make them more real to end up with real code that will run on a real machine. Okay? So
+this is instruction selection. 
+Questions on the concept of instruction selection?
+
+Okay. So we know what instruction selection is.
+
+We know what register allocation is.
+
+It remains to say something about instruction scheduling.
+And instruction scheduling is given this sequence of instructions, this is not necessarily the best ordering for 
+executing these instructions. Why? Because here, for example. So let's go back to this.
+      load a -> r1
+      load b -> r2
+  +--> ... (n cycles)  
+  |   mult r1, r2 -> r3 (this multiply(1))
+  +---load c -> r4
+      load d -> r5
+      mult r4, r5 -> r6 (this multiply(2))
+      add r3, r6 -> r7
+      store r7 -> x
+Load instructions in particular have latencies(延迟?潜伏期.).
+So a load instruction may take a few cycles to execute. So when you get to this multiply(1), you will have to wait 
+for the load, for the result of this load(mult r1...上面的两条load), to become available(adj.可获得的).
+And this can waste two or three or four cycles, depending on the machine. 
+But what if we instead of wasting these cycles, what if we put this load here(n cycles) to use this time  
+to hide the latency(n.延迟) of this load and execute another load for this multiply(this multiply(2)).
+So to hide latencies we can reorder instructions to hide latencies and get better performance. 
+
+We will say more about this next time.
+Okay? So next time we'll say more about instruction scheduling.
+
+
+### Lecture 2: Compiler Overview(2) Register Allocation Concepts
+OK. SO, we'll continue our overview of compiler. And today we will focus on register allocation and 
+instruction scheduling. So, first, let's draw that picture that we do last time. 
+So, the compiler, we have the front end. We have the optimizer. And, we have the backend.
+      front end       optimizer        backend
+    [           ]   [           ]   [           ]
+--->[           ]-->[           ]-->[           ]
+    [           ]   [           ]   [           ]
+OK? And, let's try to remember, what each one of these does, just to review what we covered in the 
+previous lectures. 
+So, what does the front end do? The whole front end, What's the function of the front end? 
+>> So, it's scanning, parsing, and semantic analysis.
+      front end             optimizer        backend
+    [scanning         ]   [           ]   [           ]
+--->[parsing          ]-->[           ]-->[           ]
+    [semantic analysis]   [           ]   [           ]
+So, what do these all combined(adj.联合的;v.结合) do? What's the input and what's the output of the front 
+end? 
+>> Source code. The input is source code. 
+And, what's the output of the front end? 
+>> Abstract syntax tree?
+>> Yes. An intermediate representation of the code. which is typically an abstract syntax tree. And, the 
+abstract syntax tree is a tree representation of the code. And, we have seen an example last time. 
+
+Now, in this middle part of the compiler we have the optimizer. 
+So, last time, we gave an example of the optimizations that take place(进行) here(1).
+What was that example? 
+>> common subexpression elimination.
+                              <here(1)>           <here(2)>
+                         machine-independent   machine-dependent
+      front end               optimizer            backend
+    [scanning         ]      [           ]      [           ]
+--->[parsing          ]----->[           ]----->[           ]
+    [semantic analysis]      [           ]      [           ]
+So, it's common subexpression elimination. And, last time we mentioned that optimizations that take place 
+here(1) are intended(adj.打算的) to be machine-independent. So, they are not low-level optimizations that target 
+a specific(具体的) machine, or that try to do good utilization(n.利用,效用) of the capabilities(n.能力) of the
+hardware. Optimization that try to maximize(v.最大化;最大限度地利用;充分利用) and optimize the utilization of the 
+hardware are here(2) in the backend. So, the backend is intended to have those low-level optimizations that 
+make the best use of the available hardware, that optimize the code on a specific hardware.  
+So, in principle, this(here(2)) should be machine-dependent. The backend is machine-dependent by nature. 
+Why the middle optimizer is supposed to be machine-independent. But, last time we said that in practice, these 
+optimization here(1) are not going to be strictly machine-independent. Their nature has nothing to do with the 
+  --> to do with 和有关,有关; 对待,如何处理; 根据这里的上下文,这里的意思为有关. 它们自然与机器无关?
+machine, it has to do with the code, right? 
+And, common subexpression elimination, it's an optimization that has to do with the code itself. It's trying to 
+eliminate some redundancy(n.冗余) in the code, or it's trying to do some re-use. That idea here in common 
+subexpression elimination is reuse. Instead of computing something multiple times, compute it once(adv.一次), and 
+then reuse it. That's the idea. 
+  CSE
+  reuse
+Now, this reuse requires resources, So, when you reuse something, you want to store it somewhere. So, you have to 
+store it somewhere, in some place, so that you can reuse it. 
+But, that place that you store it has to be fast enough. It has to have easy access. If it doesn't have easy access, 
+then that defeats(vt.使失败;n.击败) the purpose. 
+So, it's if you don't have a fast enough device that you store this thing in, you will not do an optimization. It may 
+be just faster to recompute, instead of resuing. And, having said that, this means that for this kind of reuse, 
+the best storage device for this is the register. So, you want it to be in a CPU register, which is the fastest storage 
+device. And, when you keep doing optimization like this, that require, reuse and storage, and require register in 
+particular, you are increasing the demand(n.需要;) for registers. And, increasing the demand for registers is not a good 
+thing, you know? Increasing the demand for registers may end up slowing performance. 
+Why? Because you have a limited number of physical registers on the machine. So, this is something that we will face in 
+the backend. There is a limited number of physical registers on the machine. And, if you have, like, 200 front(我听到的是different?),
+variables in you function. Two hundred variables. And, you have 300 temporaries, why do you think that the generic(adj.一般的) 
+code will have temporaries? 
+  200 variables
+  300 temporaries
+So, there are the original variables that are in the source program, and there are temporaries that the compiler will 
+generate. Why do you think those would ??? swap in and out to registers? 
+So, let's look at our example. In fact, the example we will be doing today, a times b, plus c, divided by d, is assigned to x. 
+  x = a * b + c / d;
+??? Intermediate values. So, if we look at the abstract syntax tree, we'll have a and b, they will get multiplied, but the 
+result of this multiplication has to be store somewhere, right? 
+And then, c and d, they are divided. 
+And then, you take the result and you add it, 
+and then you assign to x. 
+  this(1)
+      assign
+     /       \
+    x         +
+            /   \
+  node(1)  *     /
+          / \   /  \
+          a  b  c   d
+You assign this to x. 
+Now, this is intermediate result 
+You know when we wrote some the assembly code for this, we wrote the code like this.
+  this(2)
+  load a -> r1
+  load b -> r2
+  mult r1, r2 -> r3
+load a into register r1. 
+load b into register r2.
+then, multiply r1 and r2. And, put the result in r3.
+Now, in this code, we have three registers.
+Register r1 holds(v.保存,容纳) an actual program varialbe.
+Register number 2 has a program variable. 
+Register number 3 has a temporary. It has a .. it's.. it doesn't correspond to a program variable. It stores some 
+intermediate result, which is the result of the multiplication between r1 and r2. So, it corresponds to this node(1)
+in the abstract syntax tree. 
+So, in general, the code that is generated by the compiler, it's generated.. the first step in the code generation is 
+this abstract syntax tree. And, some compiler may, immediately convert this(1) into some linear representation like this(2). 
+
+重点:
+Some compiler may delay this a little bit and work on the abstract, on the tree representation of the code. 
+So, this(1) is what we call a tree representation, or a graphical representation of the code. And, this(2) is linear,
+a linear form, a linear representation of the code. 
+And, last time, we said that usually a compiler uses multiple representations, multiple intermediate representations, 
+throughout the compilation process. So, it will start with typically starts with a tree representation that moves to 
+a linear representation like this(2), which is abstract assembly. Then it will start at making this abstract assembly more 
+real, targeting the real machine.  
+So, here we have a program with some, 200 variables, and 400 temporaries. And, the machine has registers.
+  200 variables
+  400 temporaries
+  ----------------
+  16 registers
+So, you can not put all the variables and all the temporaries in cpu registers. 
+So, there is a competition for registers. In fact, this is going to be the main topic in today's lecture. 
+But the point here is that in optimizations may require more registers. They increase the demand for registers. 
+They increase what we call the register pressure(n.压力). And, when that register pressure increases, not all of 
+these virtual registers can be stored. So some of these virtual registers may end up in memory.   
+We will see this in detail in today's lecture. 
+But, when they end up in memory, that's slow. So, this means that, we could end up slowing the execution. 
+Some optimizations that appear(v.显得,呈现) to be good, and they are creating redundancies(n.冗余;), or they are 
+doing a lot of reuse, they may end up increasing register pressure, increasing the competition for registers and 
+some of the variables on the temporaries will not be stored in registers, they will be placed in memory. And, in 
+that case, our execution may slow down.   
+这段AI翻译供参考:
+(然而，当它们最终存储到内存中时，执行速度会变慢。这意味着，某些看似有益的优化措施实际上可能会造成冗余，或者过度地重用资源，这反而可能
+导致寄存器压力增大，加剧了对寄存器的竞争。这样一来，一些临时变量将无法存储在寄存器中，而会被放置在内存中。在这种情况下，程序的执行效率
+反而会下降。)
+
+OK. So, in the backend, we have instruction selection. And, instruction scheduling, and register allocation.
+                           machine-independent   machine-dependent
+        front end               optimizer            backend
+      [scanning         ]      [           ]      [instruction selection ]
+  --->[parsing          ]----->[           ]----->[instruction scheduling]
+      [semantic analysis]      [           ]      [register allocation   ]
+    
+    this(1)
+  load a -> r1  first(1)
+  load b -> r2  second(1)
+  mult r1, r2 -> r3
+
+                        this(2)
+                        assign
+                       /       \
+                      x         + here(1)
+                              /   \
+                             /     \                
+         +-  left branch(1) * it(1) /  right branch(1)   -+
+this(3)  |                 / \     /  \                   | this(4)
+         +-               a  b     c   d                 -+
+  leaves: a b c d
+So, we talked about instruction selection last time.
+So, what's the instruction selection?
+>> OK. The best sequence of instructions for the given code. 
+So, you can either(adv.而且) apply instruction selection.. you can apply it to a tree representation of the code. 
+You can apply directly to a tree representation of the code, or you can apply it to a linear representation of 
+the code like this(1).
+And then, you want to decide, what are the best, or what are the best machine instructions for implementing this.
+So, this(1) could by one-to-one mapping. We could just map these abstract assembly instructions to actual, 
+concrete(adj.具体的,而非想象或猜测的) instructions on the large machine. This is possible. But, sometimes this may 
+not be the most efficient way.  
+Sometimes, what was the example we presented -><this(1)> last time? 
+>> The load taking multiple cycles, so rather than having a multiple weight on the load, have another load between 
+>> those two to pick up the..
+OK. So, that was instruction scheduling. But, now we're talking about instruction selection. In instruction selection, 
+what wat the a better sequence for these three instructions? On the target machine?
+>> You said there was ??? machines that the multiply didn't couldn't do it for two loaded variables rather 
+Two memory locations, yes.
+So, if the machine, we are doing this assuming that the machine does not have a multiply instruction that can 
+operate on memory. on memory operands. But if that machine, if the target machine has an instruction  an assist 
+instruction(辅助指令?) that can operate on memory operands, we can replace this sequence of three instructions 
+with one instruction that operates directly on memory operands. Instead of loading the first(1), loading the second(1),
+and the multiplying. 
+So, instruction selection is about utilizing(v.利用), making the best use of an instruction set that is available 
+on the target processor. Making the best choices and using selecting the most efficient sequence of the machine 
+instructions for this(1), intermediate representation. Remember that this(1) is still, this(1) abstract assembly 
+is still an intermediate representation. 
+By the way, can you think of a.. can you think of an algorithm that takes you from this(2) tree that converts 
+this(2) tree into this(1) abstract assembly? 
+>> Like, just reversing the tree if 
+>> Reversing the tree. 
+What kind of reversal will give us this?
+>> I'm forgetting the words for this. 
+OK. So, what kind of reversal will help us in this case? Will get us from this(2) abstract syntax tree to 
+>> 
+Yes, it's depth first. And, can you explain why depth first? 
+>> Because you got to(开始?) go down the tree to hit a, And then, you got to back up and hit b for the ??? 
+>> and then multiply them together for the operation. 
+OK. So, we need the depth because if we are here(1), we want to perform the add. We can not perform the add 
+until we completely compute this left branch(1) and this right branch(2). So, we can not do the add until we 
+do everything below(prep.在下面) it. Until we completely compute this(3), and completely compute this(4). And..
+but, we can not compute the multiply.. we can not compute the multiply until we do everything below it(1).
+Everything beneath(prep.在下方) it, right? So, this is a depth first(深度优先) by nature. 
+In this case, we have.. these are the leaves(n.叶).
+So, leaves are loads, because we're loading these variables. 
+Then, when we get to the multiply, you multiply register 1 with register 2, and then,
+    abstract assembly(1)
+  load a -> r1
+  load b -> r2
+  mult r1, r2 -> r3 result(1)
+  load c -> r4
+  load d -> r5
+  div r4, r5 -> r6 result(2)
+  add r3, r6 -> r7
+  store r7 -> x 
+you load c into register r4, And load d into register r5. 
+And divide r4 and r5. And, put the result in r6. 
+  abstract syntax tree(1)
+           assign  store
+          /       \
+         x         + here(1):r7
+                 /   \
+r3:this(1)  +-  *     /      -+ r6:this(2)
+            |   / \   /  \    |
+            +-  a  b  c   d  -+
+Then.. so we have traversed this(1), and now we are here(1). So, we need to do add.
+So, this(1) result here is in register r3, and this(2) is in r6.
+Right? So, dividing our 4 and our 5, we have this result(1) in r3 and this result(2) in r6.
+And then, we need to add r3 and r6.
+And, put the result in some other register, like r7. And now the result is here(1) in r7. 
+So, what should we do with it?
+Yes, store it in.. so, the assign is a store. 
+We will cover this in more detail when we get to code generation, but this is just, in this case it's 
+just so intuitive(adj.直觉的,直观的). this straightforward(adj.直截了当的) conversion from this abstract 
+syntax tree(1) to this abstract assembly(1).
+store r7 into x. OK.
+So, here.. the most important observation here is that when we are constructing this abstract assembly, 
+we are assuming that we have an infinite number of registers. 
+So, this assumption is one of the main things that make it abstract assembly. So, it's not real assembly yet.
+It's not real because we are assuming that we have as many registers as we want. 
+So, what did we call these registers? 
+Virtual registers. So, these are not real registers. We're just using as many registers as we need. 
+So, these reigsters are virtual registers. 
+What the register allocator does that the register allocation phase in the compiler.. what it does it, 
+it maps these virtual reigsters into physical registers as we will see in a minute. 
+OK? We'll see how it does this mapping of virtual registers into physical registers.
+Now, I have to make a note about, these a's and b's that I'm using in my assembly. I think I pointed out 
+that real assembly does not have variable names. Right? So, real assembly machine are not aware(adj.意识到) of 
+variable names. A machine doesn't know variables. 
+Doesn't even.. is not aware of the whole notion(n.概念) of a variable. A machine knows storage locations. So, 
+it knows registers and memory locations. That's all what the machine understands.
+  (个人备注:变量名(标识符)是内存地址的别名)
+The machine doesn't understand variables.
+But, what are we implying(v.暗示) here? If you remember from lecture 1, or lecture 2.
+When we are using this variable name here, what are we implying?
+>> The address?
+Yes, the address of this variable in memory.
+And, in fact, let's introduce the notation(n.标记法) in the book.
+So, in the textbook, the textbook uses a language, an intermediate representation called ILOC, which stands 
+for Intermediate Language for an Optimizing Compiler. 
+ILOC, Intermediate Language for an Optimizing Compiler.
+ctivation record pointer address of a into r1. 
+  loadAI r arp, @a -> r1 (this(1))          load a -> r1 (this(2))
+So, what I'm writing here, this(2) is a shorthand(n.速记) for this(1). What does this mean?
+So, this is load address immediate. So, this(loadAI) is a load instruction that takes an address, and it(loadAI) takes an 
+immediate operand. So the address is ??? register. This register has a pointer to the activation record for 
+the current routine that we are compiling. And, this address of a, this is an immediate number that represent 
+what? It's just a number that offset, exactly. The offset of variable a. 
+So, let's since we wil be using this, let's clarify(vt.阐明,使更清晰易懂) it even further(adj.进一步的;adv.进一步). 
+So, if you have a main function. 
+    |              |
+    |              |
+    +--------------+
+    |              |
+    |--------------|
+    |     c        |
+    |--------------|
+    |     b        | f2                r arp
+    |--------------|                   +------------+
+    |     a        |                   |            | 
+    +--------------+ 0xff10            +------------+ 
+    |              |
+    |              | f1
+    |              |
+    +--------------+
+    |              |
+    |              | main
+    |              |
+    +--------------+
+You main function.. a program with a main function.
+The main function will have an activation record on the stack.
+This activation record has the local variables, and it has the parameters, and it has the return value, and it 
+has the return address for every function. This is what we mean by the activation record. 
+When main calls function 1, the activation record for function 1 will get pushed on the stack. When function 1 
+calls function 2, the activation record for function 2 will get pushed on the stack. 
+So, each function, each active function, as this location on the stack, that we call the activation record for 
+this function, and it has the local variables of this function, it has the parameters of this function. It has 
+the return value. And, it has the return address, and other things. So, this is the activation record.
+So, when function 2 completes, what will happen? 
+When function 2 completes executing, and needs to return to f1?
+>> Yes. The activation record of f2 gets ???(bottom of:按常理和我听出来的应该是这两个单词) the stack.
+So now, each of these activation records will have a, an address associated with it. 
+So, if we are in function 2, the address for.. the address for function 2 could be, for example, 0xff10(马上要被修改为0xff00,不用管...). 
+So, this is the starting address of f2. 
+So， if we are compiling, if the compiler is currently compiling f2, then this is the starting address of..
+let's make it 00. This is the starting address of function f2. And, the function f2, has variables a and b and c. 
+So, the address of variable a is this starting address, which we assume is stored in a register that we call 
+activation record pointer register. 
+So, it's a special register that holds the starting address of the activation record of the current function. 
+So, in this case, it's going to have 0xff00. 
+
+
+
+
+
+
+
+
+
+  
