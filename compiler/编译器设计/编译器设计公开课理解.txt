@@ -1,0 +1,47 @@
+想到什么写什么,用词未必精准或正确...
+
+front end
+    scanner 扫描器
+        (letter -> word)
+        letter -> token
+    parser 解析器
+        (word -> sentence)
+        token -> statement
+    semantic analyzer 语义分析器
+        例如类型检查...
+
+    树/图 中间表示 例如：抽象语法树
+
+optimizer 优化器
+    high level 优化, 例如 common subexpression elimination(相同子表达式消除);
+    想要的理想状态应该是机器独立的(machine independent);
+    实际是无法完全机器独立的,例如有限的寄存器数量, CSE可能会造成负优化，无论是缓存还是主内存消耗的(时钟)周期都与寄存器file有
+    数量级(order of magnitude)的差距.
+
+backend 后端
+    顺序/线性 (low level 底层的)中间表示 例如: ILOC, 编译器设计公开课的板书使用ILOC的速记(shorthand);
+    low level的优化;
+
+    1.instruction selection
+
+
+    2.register allocation
+       virtual register map physical register 
+       顺序/线性 (底层)中间表示
+
+       a.假设前提：CPU的寄存器数量是无限的(无限的虚拟寄存器...)
+       b.到寄存器分配(回到real真实,现实...),在虚拟寄存器 map映射 物理寄存器的过程中虚拟寄存器的live range和物理寄存器的reuse,
+         live range:活跃范围, 由 虚拟寄存器定义 和 虚拟寄存器最后使用 决定;
+         resue: 在执行到 虚拟寄存器最后使用指令时(因为指令都是按 载入->写回 这个顺序) 物理寄存器即可重用;
+         虚拟寄存器 映射到 物理寄存器过程中:
+            spill:
+                register pressure,无可重用的物理寄存器 -> 添加spill (code): store或load mem -> 内存地址;
+            virtual register 可能是: 
+                1.(程序的变量->内存地址)变量;
+                2.临时变量(ALU的计算结果值?中间结果.);
+            两者之一.
+
+    3.instruction scheduling
+
+
+

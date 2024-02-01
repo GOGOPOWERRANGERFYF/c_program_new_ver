@@ -1,6 +1,6 @@
 笔记：
 
-P1:
+### Lecture 0: 
 编译器会用多种中间表示(intermediate representation),抽象语法树只是其中一种.
 instruction 指示；(计算机的)指令.
 semantic analysis 语义分析 或 (context-sensitive analysis 上下文相关分析)
@@ -332,7 +332,7 @@ abstract or general stuff that applies to all processors.
   [----+----+----+------]
   [ T1 | T2 | T3 |...   ]
 And then this is specific to target number one(T1). This is specific to target number two(T2). This is specific to target number three. 
-And so forth. So these targets are target processors, for exmaple, Intel X86 is a target, ARM architecture is a target, GPU is a target,
+And so forth. So these targets are target processors, for example, Intel X86 is a target, ARM architecture is a target, GPU is a target,
 imbedded processors, many many different(adj.不同的) kinds of processors. Okay. So here in the optimizer, I will just give an example of 
 an optimization that is done here, one of the common optimizations. And this common optimization is called common subexpression 
 elimination(n.消除). And I will just illustrate(vt.说明;(用示例,图画等)解释) this by example. 
@@ -375,7 +375,7 @@ to be in the cache. But if we have a bunch of code in between(1), then this t ma
 it from main memory. Definitely(adv.肯定,明确地) if this(here(1)的t) is in main memory, this transformation will make things worse.
 But even if this(here(1)的t) is in the cache, bringing this from the chache may take more time than recomputing a plus b. And even 
 if it's in the storage(n.存储) location that is faster that the cache, which is what? What's the storage location that is faster 
-than the chache? 
+than the cache? 
 >> The register.
 Even if it's in the register, so if it's in the register here, yes, this will work well, but this will require this t(在temporary(0))
 to be reserving a register for a long time<a long time(1)>. And with this variable<t in temporary(0)> reserving a register for a long 
@@ -807,15 +807,15 @@ So, if you have a main function.
     |              |
     |--------------|
     |     c        |
-    |--------------|
+    |--------------|        this(3)
     |     b        | f2                r arp
-    |--------------|                   +------------+
-    |     a        |                   |            | 
-    +--------------+ 0xff10            +------------+ 
+    |--------------|        this(2)    +------------+
+    |     a        |                   | 0xff00     |  register(1)
+    +--------------+ 0xff10 this(1)    +------------+ 
     |              |
-    |              | f1
-    |              |
-    +--------------+
+    |              | f1         a -> 0xff00
+    |              |            b -> 0xff04
+    +--------------+            c -> 0xff08
     |              |
     |              | main
     |              |
@@ -840,7 +840,705 @@ let's make it 00. This is the starting address of function f2. And, the function
 So, the address of variable a is this starting address, which we assume is stored in a register that we call 
 activation record pointer register. 
 So, it's a special register that holds the starting address of the activation record of the current function. 
-So, in this case, it's going to have 0xff00. 
+So, in this case, it's going to(将) have 0xff00. 
+So, to compute the actual address of a variable, for a, it's going to be this.. 0xff00. That's going to be for, variable 
+a. For variable b, it's going to be 0xff04. Assuming that we have 32-bit variables. This(1) is going to be, offset 0. This(2) 
+is offset 4. This(3) is offset 8. Assuming 32-bit variables. 
+And, for c, 0xff08. 
+              this(1)
+                |
+                V
+  LoadAI r arp, @a -> r1 this(2)         load a -> r1 here(1)
+OK, SO, this is the notation in the book. So, a load instruction takes the activation register which is in.. for a local 
+variable. The base if the activation record pointer. The address in the.. the register(1) that holds the activation record 
+pointer. And, this(1) is the offset for the variable.
+And, what I have here(1) is just a shorthand for this(2). it's understood that we're assuming that variable are local variables,
+and all addresses are relative to that activation.. to the starting address of that stack frame. 
+And. a is not a variable, it's in fact on offset. 
+OK? Questions on this?
+Alright. So usually we will just do this<here(1)> shorthand. We will not write the full syntax of the assembly in the book, 
+or the abstract assembly. OK? Now, how does the compiler.. how does the register allocator map these virtual registers 
+into physical registers?
+        virtual registers
+      +-  load a -> r1        here(2)           
+      |   load b -> r2                          -+ live range(2):red(3)  definition(1)
+live  |   mult r1 here(3), r2 -> r3   this(1)   -+                       last use(1)
+range |   load c -> r4
+(1)   |   load d -> r5
+:red  |   div r4, r5 -> r6
+(1)   |   add r3, r6 -> r7
+      |   store r7 -> x 
+      +-  add r1 here(4), r7 -> r8    >> here(1):整条抽象汇编指令:red(2)
+Now, let's assume that we have.. or, the target machine.. has  three physical registers. 
+If the target machine has three physical registers..
+  P1, P2, P3
+so let's call them P1, P2, and P3.
+So, we have three physical registers of the target machine, and how many virtual registers do we have here?
+Seven. So, the job of the register allocator is to do the mapping between these. So, how will it ma them in 
+this case?
+Well, it's going to say, OK, 
+    allocation(1)
+  r1 -> P1
+  r2 -> P2
+  r3 -> p1
+register r1, I'm going to map r1 to P1, the first physical register. 
+And, I'm going to map r2 to P2.
+Now, here, obviously we need two physical registers.
+Now, this(1) multiply now is multiplying r1 and putting the result in r3.
+The question is, for r3, do we need a new register, or we can just reuse P1 or P2?
+>> Reuse.
+So, why can we reuse? Yes, we can reuse. 
+>> Because they're not using it.
+Exactly. Because we are not used again.
+So, because r1 and r2 are not used again, we don't have to use a third physical register. We can just reuse r1 or r2.
+So, we can say, OK, r3 is going to get mapped to P1. 
+Because after this(1) instruction, we do not need r1 and r2 again.
+To explain this further, assuming that we have assumed an additional instruction like this, add r1 and r7, and put the 
+result in r8. Now, if you.. if we had an instruction like this, 
+would have this allocation(1) been legal? No. It won't be legal. Now, here, for r3, you can not reuse.. you can not reuse 
+the register for 1, because I still need it. I still need it here(1). 
+So, I still need to keep r1 in a physical register until I get to(到达) this<here(1)> instruction.
+So, basically, you always need to keep a virtual register in the same physical register until you are done with it. until the 
+last use of that register.
+So, with this instruction in red<here(1)> added, I want to be able to reuse P1, but I can still reuse P2. Right?
+P2.. r2 is not used. So, with instruction in red<here(1)>, I can reuse P1..(说错了,马上找补...) I can not reuse P1, but I can 
+reuse P2.
+  r1 -> P1
+  r2 -> P2
+  r3 -> p2
+So, in register allocation.. and, by the way, we are not discarding(v.丢弃) an algorithm now. We are discarding the concept.
+  我觉得这里字幕错了,应该是discussing(v.讨论;论述;谈论;商量;详述)
+We're trying to use the minimum(adj.最底限度的) number of physical registers, or at least use the registers that we have.
+And, we are trying to do as much reuse as possible, OK? 
+So, if we have an instruction like this<here(1)>, then we would say that, the live range of register r1 is going to be 
+this much. 
+So, this is what we call the live range(1) of register r1.
+So, register r1 got defined here(2), and it got used here(3) and here(4).
+So, the live range of our register is the distance between the definition, this<here(2)> is where we're defining it.
+We're putting a value in it(r1). OK, we're storing a value or a result in it(r1). So, it's defined here(2). And, it's 
+used here(3) and here(4). So, this is the live range of register r1. So, register r1 has a long live range(1) with this 
+instruction in red(2).
+While.. what is the live range of register r2?
+>>It's just those two below it.
+Yes, just the three, the first three instructions.
+So, this is the live range(2) of r2.
+>> would the live range start at the second instruction?
+We're using it here, right? (不重要,指错位置了,马上更正...不用管)
+Oh.. yes. You're right. Yes. So, this is where we are starting, with the definition.
+Yes. So, this is the live range of r2.
+So, this is the definition(1), and this is the last use(2).
+While for r1, this<here(2>) is the definition and this<here(1)> is the last use.
+OK. Question on that concept of a live range? OK. So, the point here is when we have longer live ranges, we have a 
+stronger competition for registers. So, we say that we have high register pressure.
+In fact, by register pressure, we mean the number of registers that are live at a certain point.
+We'll say more about this later. But, let's now get back to this example.
+But, let's now get back to this example.
+
+So, let's now get rid of(摆脱) this red(2) instruction. Now, we get rid of this instruction, then the live range of r1 
+now becomes this(如下图). Live range of r1.
+live  +-  load a -> r1
+range |   load b -> r2                -+ live range of r2
+of r1 +-  mult r1, r2 -> r3 here(1)   -+                     -+
+          load c -> r4             -+                         |
+    .(1)  load d -> r5              | live range of r4        | live range of r3
+  this(1) div r4, r5 -> r6 .(2)    -+                         |
+  this(2) add r3 here(2), r6 -> r7                           -+
+          store r7 -> x
+OK. So now, we can do, again, can use P1. 
+
+Now, for r4, what can I use?
+Let's say we will always use the physical register with the smallest number that is available.
+So, what will be available for us to use for r4?
+>> P2.
+P2. Exactly. So, for r4, we'll use P2.
+  r1 -> P1
+  r2 -> P2
+  r3 -> p1
+  r4 -> P2
+  r5 -> P3
+  r6 -> P2
+  r7 -> P1
+Of course, if we use P3, it would be perfectly fine. but we're trying to use the minimum number of 
+registers here.
+So, r4 we can use P2. For r5.. We must use P3, right? (提示和备忘:看P1和P2保存的虚拟寄存器的生命周期)
+Because here, at this point.. At this point(.(1)), we have register r3 and r4, both of them are live(adj.活的,有效的).
+So, here when you get to(达到) this point(.(1)), r3 is live, because it got defined here(1), and it's used here(2). So, 
+this is the live range of r3. Right? 
+And, the live range of r4 is this(live range of r4). 
+So, at this point(.(1)), r3 and r4 are still live, so we can not use the registers of, P1 and P2 for r3 and r4.
+We must use a third register. Here. OK. So, for r5, we must use P3.
+OK? And, for r6, now..so, which registers are no longer live at this point? r4 and r5, right?
+r4 and r5, after we execute the divide, we no longer need them. 
+(理解:执行到最后使用寄存器的抽象汇编指令时就不需要了,
+纯属个人附加的理解->操作数送入ALU后就可以复用该物理寄存器了.刚好下面紧接的讲课内容验证了我的这个想法。。。)
+By the way, we are assuming that, this(1) instruction, you can reuse the reigsters that you are using for the 
+input for source operand of an instruction.
+Because you will read these values(保存在r4和r5的值) before you write to the register that will hold the result. 
+So, that's why we are able to reuse the registers that are used for the source operands of an an instruction.
+(理解+润色翻译：重用一条指令中用于源操作数的寄存器[虚拟寄存器映射的物理寄存器])
+So now, r4 and r5, they're not used below(备注：该点下面且包含该点) this point(.(2)), so we can just reuse 
+either(det./pron.两者中任何一个) P2 or P3. We will reuse P2.
+And now, for r6.. so, r3 is in P1. r6 is in P2. Right? And, in fact, after we are done with this(2).. at this point, 
+after we're done with r3 and r6, we can use any register that we want, right?
+(个人理解：根据示例中给出的抽象汇编指令这么来理解,执行到this(2),该指令为r7寄存器的定义,其他所有虚拟寄存器的最后使用
+  ->[个人推测的规律(待验证)：寄存器定义,寄存器用于保存目的操作数; 寄存器使用,寄存器用于源操作数],
+  ->[虚拟寄存器的定义(即第一次出现)意味着物理寄存器的分配,用于寄存器的写入;
+     寄存器的使用,用于对寄存器的读取,最后使用+用于读取,所以读取后该虚拟寄存器映射的物理寄存器就可以再次用于分配了;]
+因此r7可以使用任一我们想要使用的物理寄存器.)
+So, for r7, you can use anything that you want.
+And, let's stick to the rule of using the smallest number. So, we'll just use P1 for r7. 
+And then, we store P1 into x. 
+OK? So, in this case, we managed to map virtual registers into physical registers.
+  P1, P2, P3
+And, we could do it wit three physical registers. 
+
+Now, let's assume that we only have two physical registers.
+So now, assume two physical registers. P1 and P2.
+  P1, P2
+So, that's all that you have. Now, let's redo it with two physical registers, see what happen.
+        load a -> r1
+        load b -> r2      
+        mult r1, r2 -> r3 this(1)
+        load c -> r4     
+.(1)    load d -> r5     
+here(1) div r4, r5 -> r6 
+here(2) add r3, r6 -> r7 
+        store r7 -> x
+        -- add r1, r7 -> r8 -- (that red instruction that I deleted(1))
+OK. So now, we can do, r1 in P1. And, r2 in P2. There is no other way of doing it. We have two of them.
+  r1 -> P1
+  r2 -> P2
+So, we put this(r1) in P1, and this(r2) in P2.
+
+Now, we have this(1) multiply and we need a register for the result. Without that red instruction that I deleted(1),
+we can use the reigster for r1 or r2, because we assume that is consumes(v.消耗) the source operands before it writes  
+to the destination operand.
+So, we can put r3 in P1.
+  r1 -> P1
+  r2 -> P2
+  r3 -> P1
+Now, we need a register for r4, so we can put it where.. where can we put r4? 
+>> Into P2?
+In P2. 
+  r1 -> P1
+  r2 -> P2
+  r3 -> P1
+  r4 -> P2
+Now, we need a register for r5. This is where we hit a problem.
+Now, we need a register for r5. And, we have, r3 and r4.. at this point(.(1)). we are looking for a register for r5.
+Now, r3 and r4 are the ones that have the registers. Are they live or dead?
+>> They're live.
+>> Live.
+They're live, because we're using r4 here(1), and we're using r3 here(2). So, live means that they will get used 
+later. So, both r4 and r3 are live. So, we can't reuse P1 or P2.
+But, we need a register for this(r5). So, what we can do here is that, OK, we can say that this(1) r3, we can 
+store it in memory. So, the register allocator in this case would generate a store instruction.
+        load a -> r1
+        load b -> r2      
+        mult r1, r2 -> r3
+        store P1 -> mem temp (修改前为temp)
+        load c -> r4   this(1)  
+        load d -> r5   this(2)  
+  .(1)  div r4, r5 -> r6 this(3)
+        add r3, r6 -> r7 
+        store r7 -> x
+        -- add r1, r7 -> r8 -- (deleted)
+Store r3, which is, P1, store P1 in a temp.
+So, this temp stands for(代表) a temporary memory location. Or, let's call it, to be explicit(adj.明确的), 
+let's call it.. or mem temp.
+OK? Now, we can use this register P1 for r5. So now we can say r5 goes to P1.
+  r1 -> P1
+  r2 -> P2
+  r3 -> P1
+  r4 -> P2
+  r5 -> P1
+So now, this(1) is P2, this(2) is P1.
+When we divide, we divide P1 by P2, or P2 by P1.
+And, we'll put the result in r6.
+OK? Now, for r6, which register can we use?
+Now, after this point(.(1)), r4 and r5, are they going to be live or dead? 
+>> They're dead.
+Dead. So, we can reuse either P1 or P2.
+OK? Because r4 and r5 will no longer be needed. So, we can say, OK, 
+  r1 -> P1
+  r2 -> P2
+  r3 -> P1
+  r4 -> P2
+  r5 -> P1
+  r6 -> P1
+we'll put r6.. in P1. Because both of these guys(r4,r5 at .(1)) will not be needed after this(3) instruction(之后且包含).
+Now, we need r3. But virtual register r3 is no longer in physical register. So, it's not in a physical register. we stored 
+it in memory. 
+So, what do we need to do? What't the logical thing to do?
+>> ???
+Load it, yes. Bring it back from memory.
+So, we load that memory, that temporary memory location, 
+        load a -> r1
+        load b -> r2      
+        mult r1, r2 -> r3    
+        store P1 -> mem temp  >>spill    sotres(1)
+        load c -> r4   
+        load d -> r5   
+        div r4, r5 -> r6
+        load mem temp -> P2    here(1)    loads(1)
+        add r3, r6 -> r7 
+            P2  P1
+        store r7 -> x
+we store it into.. which register? What are the options that we have?
+We only have one option.
+>> P2.
+P2. Because P1 has r6 in it, and we still need r6. So the only option that we have is P2.
+OK? So now, we can, add.. so, basically adding, P2 and P1. And then, we can put the result.. once we are done 
+with this, we can use any register we want, so we can put r7 in P1.
+  r1 -> P1
+  r2 -> P2
+  r3 -> P1
+  r4 -> P2
+  r5 -> P1
+  r6 -> P1
+  r7 -> P1
+OK? Now, what's the point here?
+The point here is that with fewer registers, when we have two physical registers instead of three, the register
+allocator could not map each virtual register to a physical register. 
+It had to do some storing and loading.
+So, in this case, r3 did not get mapped, entirely(adv.安全;完整地;全部地) to a physical register.
+In fact, we put it in a physical register temporarily. Then, we stored it in memory. 
+Then, we loaded it again when we needed it.
+So, this kind of store, we call it spilling(v.溢出). With the terminology(n.术语) of compliers and register allocation, 
+this is a spill. So, we basically spilled it to memory, because we don't have enough room for it on the register file.
+There is no room for it on the register file, so we spilled it to memory. And, here(1) we loaded it again.
+So, this mean that when we have high demand for registers, the register allocator will not be able to accommodate(v.容纳)
+all the virtual registers.
+It will not be able to find a physical register for every virtual register. So, it will be forced to do spilling. It will 
+be forced to spill some of them to memory.
+And, obviously, these stores(1) and loads(1) that we are adding, that we call spill code, obviously these are slowing 
+the execution. These are going to(将) slow the execution. We are adding instructions. These instructions are going to be(将要)
+using machine resources, they will use functional units, 
+and they will use all the machine resources.
+And, they will be using the memory system. And, the memory system has a limited bandwidth. 
+So, you are executing more load than(我觉得应该是and...) stores, and that's slowing you execution.
+So, the job of the register allocator is to do the mapping with minimum spilling.
+The job of the register allocator is to minimize these spills. It try to accommodate all the virtual register, and map them
+to physical registers.
+Any question on these concepts?
+>> I have a question now.
+>> With the architecture of today's processors, wouldn't when it spills over to write to memory, 
+>> wouldn't it go into the L1 cache?
+Oh, even if it does.. well, we can.. generally speaking, 
+we can never control if something is in L1 cache or not.
+But, most likely(adj.最有可能), when you are spilling, these spills are going to go to the stack. Yes. And, they're going to 
+the stack, and they are getting reused.. reused within a short period(n.一段时间) of time, so they're very likely to be in the 
+L1 cache.
+So, it's, most likely, you will be hitting the L1 cache, or things will hit in the L1 cache, and these will not be cache misses.
+But, even if you hit in the L1 cache, this is still slower than storing them in a register
+L1 cache is still slower than the register. Accessing L1 cache will take two of three cycles, While accessing a register is 
+instantaneous(adj.瞬间的). You can access the register immediately.
+So, definitely(adv.确实) L1 cache is much faster than main memory. So, L1 cache you can access it in two to three to four cycles,
+while main memory.. to access main memory, you need hundreds of cycles. So, it's two orders of magnitude(n.巨大) (它是两个数量级), 
+  ->附加：在数学和工程领域，“orders of magnitude”（数量级）是一个特定的术语，它用来描述数值之间的差距。
+on modern processors, it's two orders of magnitude faster than main memory, but it is still slower than a register.
+And, you are also using, other resources. You are using the memory system. And, your memory system has a limited bandwidth. You 
+are executing more memory operations. And, memory operations are expensive(adj.昂贵的). So, your memory system has a limited bandwidth.
+Overall(adj.总体的,全面的,综合的;adv.全部,总体上;), you have limited resources on the machine. And, these instructions(添加的spill相关指令) 
+that you are adding are just going to use some resources. They will use issued slots. So, it's an instruction that will use issued slots,
+  ->附加：issued slot 发射槽位; issued v.发出;(正式)发给; slot n.狭槽;(投放或插入东西的)窄缝,扁口;
+  ->     目前只能粗略抽象地理解："相关资源"就是槽位... 例如需要使用的物理寄存器?然后相关指令使用分配给其的"资源",载入数据到"资源":槽位的动作,是不是像发射...
+  ->     有空去找偏硬件方面的书籍再去深入了解.例如：《计算机组成与设计 硬件软件接口》?
+and that will use an issued slot that could be used for another instruction.
+OK? Yes. So, we would expect(v.预计) spill code to hit on the cache most of the time, but even if it is, it will still slow the execution.
+  -> cache的相关疑问解疑：回答在AI_Temp.md文件中:
+  ->  问题目录：
+  ->    问题：只有L1缓存是处理器私有的吗？
+  ->    问题：从寄存器将数据写回内存需要经过L1到L2再到L3这个过程吗？
+  ->    问题：所以数据写回L2或L3并不是写回主内存的必要条件？
+  ->    问题：那可以跨过L2和L3直接将数据写回主内存吗？ *(重点疑问,直接看这个的回答就好,前面的问题是我当时问得不够精准.)
+Of course, if it misses on the cache, it's a huge(adj.巨大的) performance hit(vt&vi.打,打击;n.击中,命中).
+Any questions on the concepts of register allocation and spilling?
+OK. So, is it crystal(adj.清楚的,如水晶般的;n.水晶,晶体) clear?
+Yes. OK. So, unfortunately, optimizations tend(v.倾向,往往会) to increase the demand for registers. And, one of these optimizations that 
+increase the demand for registers is the common subexpression elimination that we described last time. The other one is the other 
+optimization in the backend, which is instruction scheduling. So, instruction scheduling.. increase the demand for registers. We only 
+described it, described instruction scheduling briefly(adv.简要地), but we will describe it in greater detail next time, what instruction
+scheduling is. So, the idea in instruction scheduling is hiding the latencies of the loads.
+        load a -> r1
+        load b -> r2      
+   +-->
+   |    mult r1, r2 -> r3     This(1)
+   |    store P1 -> mem temp
+   +--  load c -> r4   
+        load d -> r5   
+        div r4, r5 -> r6
+        load mem temp -> P2
+        add r3, r6 -> r7 
+        store r7 -> x
+This(1) is a multiply that uses the result of the load, so why don't we just execute another instruction while we're waiting 
+for the load to complete? So, this is a brief and possibly(adv.可能,尽量) vague(adj.模糊的) description of instruction scheduling,
+but next time we will explain instruction scheduling in detail. 
+OK? Alright. So, I will see you.. any questions before we end the lecture?
+OK. So, I will see you.
+
+
+### Lecture 3: Compiler Overview(3) Instruction Scheduling Concepts(n.概念,观念)
+So, today's lecture is going to be about instruction scheduling.
+So, last time, what was the topic of last lecture?
+>> Instruction selection.
+Register allocation.
+>> Yeah.
+Okay. So, what is register allocation? How would you describe it?
+>> Mapping the virtual registers into physical registers.
+So, it's mapping virtual registers into physical registers.
+And what's a virtual register? What's a virtual register?
+>> It's part of the abstract assembly that's generated by the ???.
+Okay, yes, it's part of the abstract assembly. But what does a virtual register correspond to? What does it represent?
+>> It makes the assumption that you have an infinite amount(n.数量) of registers.
+Yes, exactly. When you are using virtual registers, you are making the assumption that you have and infinite number of 
+reigsters on the machine. The compiler assumes that there is an infinite number of registers on the machine.
+Until it gets to(开始,到达) register allocation. So, in register allocation, now things get real.
+Now, we're going to map these virtual registers into physical registers. 
+So, a virtual register could be one of two difference things. So, what does a virtual register correspond to in that first program?
+  ->翻译：因此，一个虚拟寄存器可能是两个不同东西之一。
+>> A variable.
+Yeah. So, it corresponds to a variable. But a virtual register could be something else. It doesn't have to be a program variable.
+It could be?
+>> Temporary value.
+A temporary or an intermediate(a.. i.. 中间产物). A temporary variable that holds some intermediate result, okay?
+So, that was the register allocation stuff.
+    register allocation
+          virtual register
+         /            |
+        |             |
+        V             V
+      variable    temporary variable(hold intermediate result):这个分支为个人根据理解补全的(原课程里板书没写完直接擦掉了...) 
+  -> 附加个人理解：variable，使用程序里的变量(变量->内存地址)需要先载入寄存器;
+  ->             temporary variable, ALU计算寄存器里的值(载入的程序量)后输出的结果值.
+  ->             在抽象汇编(中间代码?中间表示之一?)中,是先假设机器有无限数量的寄存器(虚拟寄存器)的,
+  ->             到了寄存器分配阶段,抽象汇编中的虚拟寄存器可能是两者之一。
+  ->             程序中的变量或临时的变量(程序中的变量和计算结果即临时的变量).
+  ->             
+  ->             简要概括：
+  ->              虚拟寄存器
+  ->                两种表示：1. 变量; 2. 临时变量;
+  ->                live range：活跃范围 由 虚拟内存定义 和 最后使用决定;
+  ->                 虚拟寄存器 -map-> 物理寄存器
+  ->              物理寄存器：1. reuse; 2. register pressure -> spill code;
+
+Now today, we will be discussing instruction scheduling. Instruction was briefly described in the previous lecture.
+today we're going to study it in detail. So, let's look at our.. the same example,
+x equal a times b plus c divided by d.
+  x = a * b + c / d;
+                               
+           assign                  this(1)
+          /       \
+         x         + 
+                 /   \
+                *     /    
+              / \   /  \  
+              a  b  c   d 
+
+Let's look at this example. The abstract syntax tree for this is going to be, adding.. multiply, sorry. Multiply a and b.
+And dividing c by d. And then adding the results. And then assigning to x.
+Okay, So, now let's try some assembly code from virtual assembly for this(1).
+So, let's stick to(坚持,坚持不变,继续使用...) the code that we wrote last time.
+  <these instructions(1)>
+  load a -> r1
+  load b -> r2
+  mult r1, r2 -> r3
+  load c -> r4
+  load d -> r5
+  div r4, r5 -> r6
+  add r3, r6 -> r7
+  store r7 -> x
+So, we have load a into register r1. By the way, last time we pointed out that this load is a shorthand for a load instruction
+that takes a register and an immediate. So, this a here, represents what in the assembly?
+So, in an actual assembly, this a will be an offset. So, it will be just a number, an integer. An offset relative the activation
+record pointer. 
+So, loading a into r1, loading b into r2.
+Then multiplying r1 and r2. And putting the result in r3.
+Then loading c into register r1.
+loading d into register.. sorry. Into register r4, r5. And then dividing what by what?
+r4 by r5. And putting the result in r6. Then adding? R3. Putting the result in r7.
+Then storing r7 into x. 
+
+Now the point is that when we have.. when we have code like this, some of these instructions(1), like 
+the load instructions, some of them have long latencies(空闲潜伏期/延迟). And so, it takes a certain number of cycles for the result 
+to become available(可用的,可获得的). 
+So, if we assume.. let's assume that the following latencies. 
+Let's assume that 
+for the load, we have a latency of 3 cycles.
+For a multiply, 2 cycles.
+For a divide, 5 cycles.
+And for store, 2 cycles.
+And for the add, 1 cycle.
+  Latencies
+      load: 3 cycles
+      mult: 2 cycles
+      div: 5 cycles
+      store: 2 cycles
+      add: 1 cycle.
+Usually we mention the ones that are not.. that are greater the one.
+The instructions that have the latency(延迟) greater than one. And everything else will by default, has a latency of one.
+(默认情况下，其他所有东西都有一个延迟。)
+So, but in this case, we only have the add. So, we just mention it explicitly(明确地). 
+Okay, so, with these latencies, let's try to count the number of cycles that this sequence of code is going to take.
+  start    end  
+  ----------------------------------------
+    1       3        load a -> r1               this(2)
+  ----------------------------------------
+    2       4        load b -> r2               this(1)
+  ----------------------------------------
+                     mult r1, r2 -> r3          this(3)
+  ----------------------------------------
+                     load c -> r4
+  ----------------------------------------
+                     load d -> r5
+  ----------------------------------------
+                     div r4, r5 -> r6
+  ----------------------------------------
+                     add r3, r6 -> r7
+  ----------------------------------------
+                     store r7 -> x
+  ----------------------------------------
+So, let's do the.. let's try to count the cycles. And so, a start and end.
+So, assuming that we start in cycle 1. This(load a) load will take 3 cycles. So, it's going to start in cycle 1 and end in 
+cycle 3, okay?
+Now, modern processors, offer you the option of executing instructions in parallel(并行的).
+So, in.. what's the architectural feature that will.. that allows you to start a new instruction in each cycle?
+Even if some instructions have not completed?
+>> Pipelining it?
+Pipelining, exactly. So, with pipelining, you may start a new instruction, even if some instruction have not completed yet.
+(*重点:注意下面的语句,这是课程里这个例子的假设前提,不然会有很多疑问,假设这是每个时钟周期可以开始一条新指令的单发射CPU[流水线],再往下看还有另一个前提(下1),
+下一条新指令要在不[数据或控制]依赖其它指令的前提下才能实现下一个周期开始该条新指令.)
+And in this case, let's assume that we can start a new instruction, one new instruction with each cycle. So, this is a 
+single-issue machine.
+(附加:单发射（指令）机器,在同一时间内只能对一条指令进行解码和执行,解码和执行为流水线的两个不同阶段,每个阶段同一时间只能够处理一条指令[一条指令当前处于某个阶段])
+We're assuming a single-issue machine. Where in each cycle, we can start a new instruction.
+  Latencies           (个人添加:这里的cycle为时钟周期)
+      load: 3 cycles   
+      mult: 2 cycles   
+      div: 5 cycles
+      store: 2 cycles
+      add: 1 cycle.
+  single-issue machine
+But assuming that this instruction is what?
+In every cycle, we can start a new instruction, assuming what?
+>> It's the instruction is independent of the previous instruction.
+  (前提(1)->理解：在单发射机器中,假设在每个周期,我们可以开始一条新指令,这个假设的前提是当前指令的执行不依赖于前一个指令[数据依赖或控制依赖])
+Exactly, exactly. That's the point.
+So, as long as(这里翻译为 只要) we have an independent instruction. An instruction that does not depend on the instruction that is currently 
+executing in the pipelining, we can start a new instruction.
+So, here, with this(1) load, is it dependent or independent?
+>> independent.
+It's independent. It doesn't depend on this(2).
+So, we can start it.. this is.. sorry, start. So, we can start it in cycle 2, because it's independent. And it's going to finish in cycle 4.
+  ===> 暂停：(需要补的知识,CPU的单发射和多发射,深入理解流水线...计算机体系结构的知识点,理解后再继续课程...20240124)
+  ===> 大概厘清了，准备可以继续开始课程了...(20240126)
+Now, this(3) multiply, is it depend or independent?
+>> Dependent.
+It's dependent. In fact, it depends on both(this(2)和this(1)). 
+
+And since we are talking about dependents. Compilers construct what we call the dependence graph for this. So, if this is.. let's number the
+instructions. If this is instruction 1, instruction 2,3,4,5,6,7,8. 
+      start    end  
+      ----------------------------------------
+1.      1       3        load a -> r1              
+      ----------------------------------------
+2.      2       4        load b -> r2               
+      ----------------------------------------
+3.      5       6        mult r1, r2 -> r3         
+      ----------------------------------------
+4.      6                load c -> r4
+      ----------------------------------------
+5.                       load d -> r5
+      ----------------------------------------
+6.                       div r4, r5 -> r6
+      ----------------------------------------
+7.                       add r3, r6 -> r7
+      ----------------------------------------
+8.                       store r7 -> x
+      ----------------------------------------
+Then the compiler would construct a data dependence graph. Which is very much, in this.. for this simple example, it's an inverted(adj.反向,倒置的)
+abstract syntax tree, basically. 
+So it's going to be 1 and 2. 1 and 2 are independent. And 3, depends on both 1 and 2. So, in this case, 3 depends on 1 and 2, 
+So, in this case, 3 depends on 1 and 2, because it uses the results of 1 and 2. So, this our dependence, data dependence graph.
+  Data Dependence Graph
+    (1)     (2)
+     \      /
+      \    /
+       ↘ ↙ 
+       (3)
+Okay. Now, the multiply is dependent on both of them. So, it can't start any earlier than cycle 5. So, cycle 5 is the earliest cycle 
+from the multiply to start. Because it.. this(load b -> r2) completes in cycle 4, the result of this(load b -> r2) will be available
+in register 2 and cycle 5. This is our assumption.
+Now, this is going to take cycles 5 and 6. Now, the load, is it dependent or independent? Does it depend on the result of the multiply?
+No, it's not consuming. It's not using the result of the multiply. So, it's independent. So, we can just start it in cycle 6. We don't 
+have to wait for the result of the multiply. Okay, so, this is going to start in cycle 6.
+So, instruction number 4 is independent.
+    (1)     (2)     (4)           附加：例如(1) -> 1.
+     \      /
+      \    /
+       ↘ ↙ 
+       (3)
+And the same applies to instruction number 5. So, this is going to be 6 to 8, 6, 7, 8. And this is going to be what? So, should this to 
+9 or 7?
+>> Seven.
+Why 7?
+>> It doesn't depend on ...
+Yeah, it doesn't depend on the previous instruction. So, it can start in 7.
+You can start instruction, as long as it doesn't depend on previous instructions. So, this is going to be 7 to 9, okay?
+      start    end  
+      ----------------------------------------
+1.      1       3        load a -> r1              
+      ----------------------------------------
+2.      2       4        load b -> r2               
+      ----------------------------------------
+3.      5       6        mult r1, r2 -> r3         
+      ----------------------------------------
+4.      6       8        load c -> r4
+      ----------------------------------------
+5.      7       9        load d -> r5
+      ----------------------------------------
+6.                       div r4, r5 -> r6
+      ----------------------------------------
+7.                       add r3, r6 -> r7
+      ----------------------------------------
+8.                       store r7 -> x
+      ----------------------------------------
+And now, the divide, is it dependent or independent?
+>> Dependent.
+It's dependent. So, we have 4 and 5, they are both independent. And they feed(v.向..提供;喂养) 6.
+    (1)     (2)     (4)    (5)     <附加：4和5指的是4.和5.行抽象汇编指令>
+     \      /        \      /      this example(1)
+      \    /          \    / 
+       ↘ ↙             ↘ ↙
+       (3)             (6)
+So, 6 is fed(feed的过去分词和过去式) by 4 and 5. It uses the results of 4 and 5. This is our data dependence graph.
+Which, in this example(1), it's just an inverted abstract syntax tree.
+
+But generally speaking, it's not the case. The dependence graph is not.. it's more complex that that. But for this example(1), it is.
+
+So, the divide is dependent. So, what should be the starting cycle for the divide?
+>> Ten.
+Ten. Then the divide is?(附加:指向Latencies的板书)
+  Latencies           (个人添加:这里的cycle为时钟周期)
+      load: 3 cycles   
+      mult: 2 cycles   
+      div: 5 cycles
+      store: 2 cycles
+      add: 1 cycle.
+Five. So, it's going to be 10 to 14. Okay, 10, 11, 12, 13, 14.
+      start    end  
+      ----------------------------------------  the whole calculation(1)
+1.      1       3        load a -> r1              
+      ----------------------------------------
+2.      2       4        load b -> r2               
+      ----------------------------------------
+3.      5       6        mult r1, r2 -> r3       r3(this(2))   
+      ----------------------------------------
+4.      6       8        load c -> r4
+      ----------------------------------------
+5.      7       9        load d -> r5
+      ----------------------------------------
+6.      10      14       div r4, r5 -> r6        r6(this(1))
+      ----------------------------------------
+7.      15      15       add r3, r6 -> r7
+      ----------------------------------------
+8.      16      17       store r7 -> x
+      ----------------------------------------
+        17 cycles
+Now, the add, is it dependent or independent?
+>> It's dependent on the divide.
+It's dependent on the divide. It's dependent on this(1) and this(2), actually.
+This dependence is not a big deal because the result(3. this(2)) is already available in starting cycle 7.
+But this(1) is the dependence that is going to cause a delay. So, we can't start this at any earlier than cycle 15. Because it's(7.) 
+dependent.
+And so, our dependence graph here, 7 is dependence on 3 and 6.
+    (1)     (2)  (4)    (5)     附加：例如这里的(1) -> 抽象汇编指令的1.
+     \      /     \      /      this data dependence graph(1)
+      \    /       \    / 
+       ↘ ↙          ↘ ↙
+       (3)          (6)
+        \            /
+         \          /
+          \        /
+           \      /
+            \    /
+             ↘ ↙ 
+             (7)
+              |
+              V
+             (8)                 
+And 8(8.) is dependent on 7(7.).
+So, this data dependence graph(1) is very intuitive(adj.直观的,直觉的,易懂的.), right?
+Now, the result(7. r7) is going to be available in 16. And 16 and 17, we will finish the store. 
+So, we needed 17 cycles. Now, this is just, this is just an estimate(n.估计;v.估计,估算).
+By the way, this is just an estimate that the compiler is making. The compiler is making this estimate, based on the latencies.
+Based on instruction latencies. And based on a certain processor model.
+So, it depends on.. this whole thing depends on the.. these calculations depend on the processor model.
+  (附加：these calculations指的是计算这些抽象汇编指令,即1. 到 8.)
+But, one of the assumptions that we are making here in our calculations, are we here assuming that the loads are going to hit or
+miss in the cache?
+
+(附加：开始添加新的假设前提...缓存命中和未命中时的延迟)
+So, we are assuming that each load takes a couple of cycles or 3 cycles. This is assuming a cache hit.
+Because the cache miss, bringing something from main memory, takes how many cycles?
+>> Forever.
+No, it's hundreds. So, in a modern processor, it's going to take hundreds of cycles. So, it's two orders of magnitude more than
+  (orders n.顺序,次序,秩序...; orders of magnitude 数量级; 我个人觉得从orders为次序的角度来理解该术语...)
+bringing something from the cache. 
+So, by the way, everything that the compiler does, it's not.. it does not necessarily have to match the reality, when you run the 
+program. So, the compiler makes certain calculations and certain estimates. But these estimates are not going to be 100% true. The 
+compiler can make guesses(n.猜测) and estimates(n.估计), in terms of performance(在性能方面). But in terms of correctness(n.正确性),
+the compiler cannot guess. So, the compiler must be correct. Must generate correct code. But in terms of performance, it can make
+some guesses and estimates. 
+So, in this case, for example, one of the implied(v.暗示) implicit(adj.不直接言明的) estimates is that, these loads are hitting in 
+the cache.
+In fact, if they miss, then, this whole calculation(1) will not make sense(没有意义).
+  (附加：sense n.感觉,感知,感官(视,听,嗅,味,触) -> 延伸到更抽象的认知层面
+  个人胡乱理解：物的sense，意义，合理，存在即有意义。。。存在即合理？？？！！！R￥#%￥#%@#。。。)
+Because, we need hundreds of cycles for a cache missing memory operation.
+>> Can the compiler know if it loaded in that memory location before, so it would be in the cache?
+Okay, so, this is a good question.
+If the compiler has loaded this before, then we can assume it's in the cache. Can we always assume that something that has been
+loaded before is in the cache?
+>> No ???
+No. Because it may have gotten locked out of the cache by something else. And in fact, if you are at the certain point in a 
+program. So, this is your program. And you are here(1) in the program. You have a load somewhere here(1) in the program.
+              +------------------+
+              |     .            |    --+    starting point(1), entry point(1). 
+              |   / | \          |      |
+              |   + + +          |      |
+              |   | | |          |      |
+              |   | | |if else   |      |
+              |   | | |if else   |      |
+              |   | | |          |      +-> multiple tasks(1)
+              |   | | |          |      |
+if else(1)    |   | | |          |      |
+              |   | | |          |      |
+              |   | | |          |      |
+              +---+-+-+----------+      |
+              |   V V V          |      |
+              +------------------+    --+
+              | load .           |            here(1)
+              |                  |
+              |                  |
+              |                  |
+              |                  |
+              +------------------+
+In general, you program would have lots of conditioners. Lots of if else. Which means that there are many, many paths that
+can get you from the starting point(1), the entry point(1) to this point. So, there are multiple tasks(1).
+Because on the way, there are lots of if else(1). Lots of conditioning, conditionals.
+Now, not knowing the path, means you don't know what is in the cache.
+Because what's in the cache, the state of the machine, is dependent on the path that took you from the entry point(1) to 
+this(here(1)) load.
+Okay, so, for example, you could have an if statement, if execute a huge(adj.巨大的) piece of code. So, we don't know if 
+that huge piece of code got executed or not. Because in general, the compiler doesn't know if an if statement, you know,
+evaluates(v.评估) to two or four(应该是true or false,应该是字幕错误). So, remember that you are doing all of this at compiled 
+time. Keep in mind that you are not running this program. We are compiling. We're just translating. We're translating high
+level machine code, high level source code into machine code. That's all we are doing. We are not running the program.
+  (个人理解：中心思想->编译器对if..else..语句中哪些语句块在程序运行时哪部分会执行是不知道的[一个if..else..语句有两条路径],
+  因此无法预测哪些变量是否在和还在cache中.)
+So, you can model the processor. Like I said, you can always model the processor. But this model will never.. compile time
+information will never be 100%.
 
 
 
@@ -848,6 +1546,3 @@ So, in this case, it's going to have 0xff00.
 
 
 
-
-
-  
