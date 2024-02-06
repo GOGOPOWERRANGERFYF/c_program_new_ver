@@ -1537,8 +1537,288 @@ time. Keep in mind that you are not running this program. We are compiling. We'r
 level machine code, high level source code into machine code. That's all we are doing. We are not running the program.
   (个人理解：中心思想->编译器对if..else..语句中哪些语句块在程序运行时哪部分会执行是不知道的[一个if..else..语句有两条路径],
   因此无法预测哪些变量是否在和还在cache中.)
+
 So, you can model the processor. Like I said, you can always model the processor. But this model will never.. compile time
-information will never be 100%.
+information will never be 100%. It will never match runtime information 100%. Okay, yes?
+>> Even if you did have the instruction immediately prior(adj.先前的) pulling something in from memory, you can't really 
+guarantee(v.保证,担保;n.保证,担保;) it's in the cache. Because you could have pass switching going on. So, if another process 
+get loaded, that could kick(v.踹,踢;n.踢;) the stuff out of the cache.
+  (AI翻译和解释：在编译原理的情境下，这句话可以翻译为：“即使你在执行从内存加载数据的指令之前立即进行了操作，也无法真正保证数据已经被加载到缓存中。因为
+  可能会存在上下文切换（进程切换）的情况。所以，如果有另一个进程被加载运行，它就可能将已有的数据从缓存中驱逐出去。”这段话描述了在多进程环境下，编译器无
+  法绝对确保某个数据一定存在于缓存中的问题。由于操作系统进行上下文切换时，不同进程对缓存的使用可能导致缓存内容的变化，先前加载的数据可能因缓存替换策略而
+  被移出缓存。)
+Yes. There are so many factors that you don't know. So, the compiler can only guess. And this guess may or may not be right.
+But remember, that the compiler is allowed to guess, when it comes to performance. It's not allowed to guess, when it comes 
+to correctness. The code has to be correct. And the performance, we want it to be as good as possible.
+Okay, so now this is the.. this is our estimate. Based on this simple machine model, our estimate of the number cycles.
+Now, a compiler would do instruction scheduling. By the way, we haven't yet, said what an instruction schedular would do. An instruction
+schedular would look at this(1).
+图表(1)
+  this(1)
+      start    end  
+      ----------------------------------------  
+1.      1       3        load a -> r1              
+      ----------------------------------------
+2.      2       4        load b -> r2               
+      ----------------------------------------
+3.      5       6        mult r1, r2 -> r3        
+      ----------------------------------------
+4.      6       8        load c -> r4
+      ----------------------------------------
+5.      7       9        load d -> r5
+      ----------------------------------------
+6.      10      14       div r4, r5 -> r6        
+      ----------------------------------------
+7.      15      15       add r3, r6 -> r7
+      ----------------------------------------
+8.      16      17       store r7 -> x
+      ----------------------------------------
+        17 cycles
+      -------------
+And it would try to reorder these instructions to minimize the number of cycles. So, an instruction schedular, in this case,
+may notice that these loads have long latencies. And these loads are independent. So, I can, I can execute.. I can execute all
+the loads in the very beginning. And then do everything else afterwards(adv.之后). So, an instruction schedular may do this.
+  load a -> r1
+  load b -> r2
+  load c -> r4
+  load d -> r5
+  mult r1, r2
+Load a into r1. Load b into r2. Load c into r4. So, we are just, you know, looking at these instructions and reordering them.
+So, we are reordering these instructions, in an attempt to minimize the number of cycles needed to execute this sequence of 
+code.
+SO, Loading c into r4. we put instruction 4(4. ..), before instruction 3(3. ..). That's what we did.
+Loading d into r5. Then we multiply r1.
+
+>> Wouldn't it be faster to do run the division first? Division takes longer.
+Okay. Well, that's a good point, yes. So, the division takes longer than the multiply. But the question is, will the results 
+of the division be available or not? So, well, in fact, what you are suggestiong is that the division is slower. So, we can 
+do.. we load.. we can load c and d, before loading a and b. Because c and d are the operands that the division needs. 
+And we can do this. And do that before the division, then do the division, yes. So, we can do that.
+So, we are not, by the way, not trying to construct the optimal schedule. Because as we will see, there is no known algorithm
+that can always find the optimal schedule. But what you are suggestiong is good, yes.
+
+Now, let's stick to this, just, you know, putting the loads in the beginning. And then doing the multiply. Then doing the divide,
+which is r4 an r5. So, we put this load into r5. r1 and r2, we put this into r3(补全上面mult r1, r2 -> r3的板书). And r4 and r5, We
+put this into r6. And we add what? r3 and r6. And put this in r7. Then store r7 into x.
+  load a -> r1
+  load b -> r2
+  load c -> r4
+  load d -> r5
+  mult r1, r2 -> r3
+  div r4, r5 -> r6
+  add r3, r6 -> r7
+  store r7 -> x
+
+Okay. So, now let's count the cycles. So, this is start and this end.
+图表(2) More ILP                      个人添加备注：图表(2)原件
+    start     end
+  ------------------------------------------------------
+     1         3          load a -> r1                        this(0)
+  ------------------------------------------------------
+     2         4          load b -> r2                        this(1)
+  ------------------------------------------------------
+     3         5          load c -> r4                        this(2)
+  ------------------------------------------------------
+     4         6          load d -> r5                        This(3)
+  ------------------------------------------------------
+     5         6          mult r1, r2 -> r3                   this(1)+3
+  ------------------------------------------------------
+     7         11         div r4, r5 -> r6                    it(1)
+  ------------------------------------------------------
+     12        12         add r3, r6 -> r7
+  ------------------------------------------------------
+     13        14         store r7 -> x                       this(4)
+  ------------------------------------------------------
+  14 cycles
+  ---------
+  Latencies           
+      load: 3 cycles   
+      mult: 2 cycles   
+      div: 5 cycles
+      store: 2 cycles
+      add: 1 cycle.   
+  single-issue machine
+  instruction-level parallelism (ILP)
+So, this is going to start in 1 and end in 3. And this(1), is it dependent or independent?
+Independent. So, it's going to start in 2 and end in 4. And this(2)? Also, independent. So, it's going to start in 3 and end in 5.
+This(3) is also independent. So, it's going to start in 4 and end in 6.
+Now, the multiply is dependent. What is it dependent on? 
+>> r1 and r2.
+It's dependent on r1 and r2. So, r2, the result in r2 would be available in cycle 5. So, we can do cycle 5 here, okay? Because r2 
+is this[position: this(1)的r2 和 this(1)+3的r2]. So, r2 would be available in cycle 5. So, the multiply can go ahead in cycle 5, 5
+and 6.
+Then the divide is dependent on r4 and r5. So, the lastest result that it needs is in r5. And this(r5) will be available in cycle?
+Seven, right? Yeah. So, the divide is going to start in cycle 7. Because it(1) needs the r5.
+So, 7, r5. So, 7 and it's going to be 6 plus 5 is 11. So, it's going to end in 11.
+Now, the add is dependent on the divide. So, it will have to wait until cycle 12. And 12 to 12. And this(4) is at 13 to 14.
+So, in this case, 14 cycles.
+So, in theory here, the compiler has reduced the number of cycles need to execute this from 17 to 14(图表(1)->图表(2)).
+And, it did this by basically hiding the latencies of the loads. Or hiding the latencies of these independent instructions.
+  (附加：隐藏独立指令的延迟,在课堂的上下文理解为通过指令调度来将这些(流水线)延迟(数据或控制依赖导致的流水线停顿)隐藏.
+   更精准地说,隐藏(指令)流水线延迟. 简单来说,就是课堂这部分所讲的就是通过指令调度来减少流水线的停顿.
+   区分两个概念 指令延迟(单条指令本身执行[这里的执行指的是取指->写回全过程]的延迟) 和 流水线延迟(流水线停顿[流水线延迟,流水线阻塞]).
+   减少依赖指令"等待"的时间.
+   AI_Compiler.md,有指令延迟和指令流水线延迟这两个概念吗？
+   AI_Compiler.md,编译原理中,隐藏指令的延迟是什么意思？)
+By placing some independent instructions. It placed independent instructions between this(this(1)) load and the consumer of the 
+load, which is the multiply. So, the multiply consumes the result of the load(this(1)). The load(this(1)) has a long latency. So,
+in this long latency, we put some independent instructions(指的是this(2)和this(3)). This is the point.
+
+By doing this, we are doing more instruction level parallelism(n.平行;计算机术语一般翻译为并行). So, we are doing instruction level 
+parallelism. We are doing more instructions in parallel.
+Why? Because here, basically we are doing all of these loads(图表(2) 4条load指令), all of these 4 loads there, executing in 
+parallel(adj.并行的;adv.并列地;计算机术语统一并行的/地), okay? They are in the machine and they are executing in parallel.
+  (附加：理解这里需要了解流水线深度这个概念.)
+Here(this(0)和this(1)), we are only doing 2 loads in parallel, okay?
+So, in this case, this is more, instruction level parallelism. So, this(图表(2)) has more ILP. More instructions executing in parallel.
+图表(2) More ILP                      个人添加备注：为了方便查看,复制了一份图表(2)...
+    start     end
+  ------------------------------------------------------
+     1         3          load a -> r1                        this(0)
+  ------------------------------------------------------
+     2         4          load b -> r2                        this(1)
+  ------------------------------------------------------
+     3         5          load c -> r4                        this(2)
+  ------------------------------------------------------
+     4         6          load d -> r5                        This(3)
+  ------------------------------------------------------
+     5         6          mult r1, r2 -> r3                   this(1)+3
+  ------------------------------------------------------
+     7         11         div r4, r5 -> r6                    it(1)
+  ------------------------------------------------------
+     12        12         add r3, r6 -> r7
+  ------------------------------------------------------
+     13        14         store r7 -> x                       this(4)
+  ------------------------------------------------------
+  14 cycles
+  ---------
+  Latencies           
+      load: 3 cycles   
+      mult: 2 cycles   
+      div: 5 cycles
+      store: 2 cycles
+      add: 1 cycle.   
+  single-issue machine
+  instruction-level parallelism (ILP)
+
+Now, there is a cost for everything. So, the cost here(图表(1)) is using more registers. This schedule here(图表(1)), needs more
+registers than this(图表(2)) schedule.
+
+So, let's analyze the registers(根据上下文这里指的是虚拟寄存器) that are live, for each one of these two schedules.
+So, here let's look at... okay. Okay. So, this is live registers. So, now live registers here. After executing this(图表(1-1):this(0)),
+this instruction(图表(1-1):this(0)), r1 will be live. So, it's defined here(图表(1-1):this(0)) and it's used here(图表(1-1):this(1)).
+  (附加：所谓define定义就是载入/写入到寄存器,所谓use使用就是读取寄存器.指令中使用即读取该寄存器的数据后,就可以重用该物理寄存器了,哪怕在同一指令内使用.
+        肯定要先写入数据才能读取啊。。。即所谓定义和使用...
+   AI解惑,AI_Compiler.md：
+      问题：编译原理中，虚拟寄存器的define和use是指什么？)
+After executing this(2), live register are going to be r1 and r2. Both r1 and r2, at this point(this(1)), are live. Because they have 
+been defined and they will be used later. And later is here(this(1)). This(this(1)) is the last(use). Now at this(. <- this(1)) point, 
+after the executing of instruction 3(3.), which registers will be live? 
+>> r3. r3 only.
+What happened to r1 and r2? They are no longer live because they are not used below instruction 3. So, instruction 3 is the last use of 
+r1 and r2. So, if we have something that uses r1 here(here(1)).. if we have something that uses r1, then r1 would have continued to be 
+live. But since there is no use for it below this point(. <- this(1)), this(this(1)) is the end of the live range. So, r1 and r2 are not
+live. only r3 is live here(this(1)).
+And with this(this(3)) instruction, what will be live? And with this(this(4)), r3, r4 and r5.
+And with the divide(this(5)), which instructions will be live?
+>> r3 and r6.
+Yes, r3 and r6. Because you still need r3 in the next instruction. Yeah, you still need r3. You still need it here(this(6)). So, r3 is 
+live. But r4 and r5 will not be live after this(this(5)) instruction. They are not used below, okay? So, only r3 and r6 are live. And 
+here(this(6)), r3 and r6 are used. So, they are no longer live, only r7 is live. And here(this(7)), nothing is live.
+图表(1-1) -> 图表(1)的扩展live reigsters版本...    
+schedule 1
+   start    end                                live regs
+   ---------------------------------------------------------------------  
+1.     1       3        load a -> r1           r1                             this(0)
+   ---------------------------------------------------------------------  
+2.     2       4        load b -> r2           r1, r2                         this(2)
+   ---------------------------------------------------------------------  
+3.     5       6        mult r1, r2 -> r3      r3     (.)                     this(1)
+   ---------------------------------------------------------------------  
+4.     6       8        load c -> r4           r3, r4                         this(3)
+   ---------------------------------------------------------------------  
+5.     7       9        load d -> r5           r3, r4, r5                     this(4) peak register pressure
+   ---------------------------------------------------------------------  
+6.     10      14       div r4, r5 -> r6       r3, r6                         this(5)
+   ---------------------------------------------------------------------  
+7.     15      15       add r3, r6 -> r7       r7                             this(6)
+   ---------------------------------------------------------------------  
+8.     16      17       store r7 -> x          none                           this(7)
+   ---------------------------------------------------------------------  
+                        use r1                                                here(1)
+     17 cycles    needs 3 physical registers
+   -------------
+
+Okay, Now, if we look at the register usage(n.使用) for the other schedule. Live registers. So, for this(this(0)), the live registers 
+are r1. Now(this(1)), r1 and r2.
+>> r1, r2, r4. (this 2)
+Yeah. r1, r2, r4.
+And here? r1, r2, r4 and r5.
+Here(this(4)), we are using r1 and r2. And this(this(4)) is the last use of them. So, r1 and r2 are no longer live.
+So, we are left with r4, r5 and r3, has also become live.
+Here(this(5)), we're using r4 adn r5. So, r4 and r5 are no longer live.
+But now we have r3 and r6. And here(this(7)) we are using r3 and r6. And only r7 is live. And here(this(8)) we have none.
+图表(2-1) schedule 2
+                             live regs                                        
+  ------------------------------------------------
+1.      load a -> r1        r1                       this(0)
+  ------------------------------------------------
+2.      load b -> r2        r1, r2                   this(1)
+  ------------------------------------------------
+3.      load c -> r4        r1, r2, r4               this(2)
+  ------------------------------------------------
+4.      load d -> r5        r1, r2, r4, r5           this(3) peak register pressure
+  ------------------------------------------------
+5.      mult r1, r2 -> r3   r4, r5, r3               this(4)
+  ------------------------------------------------
+6.      div r4, r5 -> r6    r3, r6                   this(5)
+  ------------------------------------------------
+7.      add r3, r6 -> r7    r7                       this(7)
+  ------------------------------------------------
+8.      store r7 -> x       none                     this(8)
+  ------------------------------------------------
+    14 cycles    needs 4 physical registers
+  --------------  
+Now, the question is, what's the minimum number of physical registers that you need here? And what's the minimum number
+of physical registers that you need? So, this is schedule 1(图表(1-1)). And this is schedule 2(图表(2-1)).
+So, here, this is your peak(schedule 1 this(4))(n.山峰,最高点). This is the maximum. So, at this point(schedule 1 this(4)),
+you have 3 registers live, that are live. So, this(schedule 1 this(4)) is you maximum or you peak register pressure. At 
+this(schedule 1 this(4)) point, you need at least 3 registers. Because at this point(schedule 1 this(4)), you have 3 values
+that are live. So, you need 3 physical registers here(schedule 1 this(4)), at least. So, this(schedule 1 this(4)) is your 
+peak register pressure.
+While here(schedule 2), what's our peak?
+>> Four.
+Four. So, our peak is here(schedule 2 4. <-> this(3)). So, this is the peak register pressure. So, the difference between this
+schedule(schedule 1), this schedule(schedule 2) is.. schedule 1 is 17 cycles. But needs 3 physical registers. Seventeen cycles
+and it needs 3 physical registers. Schedule number 2 is 14 cycles. And needs 4 registers.
+So, basically by reducing the number of cycles, requires more registers. Nothing comes for free. And this is very intuitive.
+Because here(schedule 2) you are doing more things than(字幕应该错了,应该为in) parallel. You are doing 4 instructions in parallel. 
+You need 4 reigsters.
+  (附加： 
+    AI解惑,AI_Compiler.md:问题：4 instructions in parallel如何理解？
+    回答概览:
+      1.支持多发射技术的处理器,可以在一个时钟周期内启动并处理多条独立的指令;
+      2.在单个CPU核心内部,通过指令级并行(Instruction-level parallelism, ILP技术;
+    问题：详细解释一下指令级并行ILP技术。(instruction-level parallelism这个知识点必须要了解,是基础知识.)
+    回答概览:
+      流水线技术,超标量技术,乱序执行,分支预测,推测执行,软件编译优化.
+  )
+You need containers for these to stir(v.搅拌,(使)活动;n.搅拌;) the result of these. So, it's just like you're cooking, for example.
+If you are trying to cook and you trying to cook in parallel. And if you want to cook, meat, rice and vegetables at the same time.
+Then you need at least 3 containers, right? You cannot do it with 2 containers. If you have 2 containers, you cannot cook 3 things
+at the same time. And what is happening here(schedule 2 1. - 4.), these 4 instructions are cooking. So, this is instruction 11 
+parallelism. So, they are cooking at the same time. So, we need containers. For more paralleism, you need more containers. So, that's
+why this is intuitive.
+Now, what does the compiler do?
+So, should the compiler try to minimize the number of cycles and use more registers? Or should it reduce.. minimize the number of 
+registers and.. so, minimize the number of registers and use more cycles? Or minimize the number of cycles and use more registers?
+>> Doesn't that depend on the architecture of the processor?
+Yes. Yeah, exactly. So, it depends on the architecture, on the target processor. It depends on how many physical registers you have
+on the target processor that you are trying to generate code for.
+So, in this case, for example, if you have four physical registers available, then you can go ahead and do this more in section level
+parallels.
+  (附加：section level parallels, 这里的section指的是程序中的某一段可独立处理的代码区域)
+
 
 
 
