@@ -1798,7 +1798,7 @@ You need 4 reigsters.
     AI解惑,AI_Compiler.md:问题：4 instructions in parallel如何理解？
     回答概览:
       1.支持多发射技术的处理器,可以在一个时钟周期内启动并处理多条独立的指令;
-      2.在单个CPU核心内部,通过指令级并行(Instruction-level parallelism, ILP技术;
+      2.在单个CPU核心内部,通过指令级并行Instruction-level parallelism, ILP技术;
     问题：详细解释一下指令级并行ILP技术。(instruction-level parallelism这个知识点必须要了解,是基础知识.)
     回答概览:
       流水线技术,超标量技术,乱序执行,分支预测,推测执行,软件编译优化.
@@ -1806,9 +1806,16 @@ You need 4 reigsters.
 You need containers for these to stir(v.搅拌,(使)活动;n.搅拌;) the result of these. So, it's just like you're cooking, for example.
 If you are trying to cook and you trying to cook in parallel. And if you want to cook, meat, rice and vegetables at the same time.
 Then you need at least 3 containers, right? You cannot do it with 2 containers. If you have 2 containers, you cannot cook 3 things
-at the same time. And what is happening here(schedule 2 1. - 4.), these 4 instructions are cooking. So, this is instruction 11 
-parallelism. So, they are cooking at the same time. So, we need containers. For more paralleism, you need more containers. So, that's
-why this is intuitive.
+at the same time. And what is happening here(schedule 2 1. - 4.), these 4 instructions are cooking. So, this is instruction 
+11(字幕错误,应该为level) parallelism. So, they are cooking at the same time. So, we need containers. For more parallelism, you need 
+more containers. So, that's why this is intuitive.
+  (AI解惑：AI_Compiler.md.
+    问题：编译原理中，For more parallelism, you need more containers. So, that's why this is intuitive 这句话该如何理解
+    回答概览：
+    这句话的意思是，在进行并行处理时，若要支持更多指令同时执行而不受限制，就需要有足够的硬件资源（如寄存器）作为数据容器，以便在执行过程中容纳不相关指令的
+    操作数和结果。由于每个独立运行的指令都需要有自己的空间来保存数据，因此拥有更多的容器对于提高并行性是很直观的——就像如果想要同时做更多的事情，就需要更多
+    的工具或者工作台一样。
+  )
 Now, what does the compiler do?
 So, should the compiler try to minimize the number of cycles and use more registers? Or should it reduce.. minimize the number of 
 registers and.. so, minimize the number of registers and use more cycles? Or minimize the number of cycles and use more registers?
@@ -1816,8 +1823,138 @@ registers and.. so, minimize the number of registers and use more cycles? Or min
 Yes. Yeah, exactly. So, it depends on the architecture, on the target processor. It depends on how many physical registers you have
 on the target processor that you are trying to generate code for.
 So, in this case, for example, if you have four physical registers available, then you can go ahead and do this more in section level
-parallels.
-  (附加：section level parallels, 这里的section指的是程序中的某一段可独立处理的代码区域)
+parallels. And minimize the number of cycles. And that will work out well.
+  (附加：section level parallels, 这里的section指的是程序中的某一段可独立处理的代码区域.
+   AI解惑：AI_Compiler.md:
+   问题：问题：可独立处理的代码区域是什么意思？
+   问题：编译原理中，So, in this case, for example, if you have four physical registers available, then you can go 
+   ahead and do this more in section level parallels.这句话是什么意思？
+   问题：编译原理中，section level parallels是什么意思？
+   问题：有section level parallelism这个概念吗?
+  )
+  (暂停：补一些计算机体系结构的知识...例如 ILP等... 20240206
+    单发射和多发射描述的是处理器在单位时间内能够处理多少条新指令的能力;
+    AI_Compiler.md问题:
+      1.单发射和多发射CPU与单核和多核CPU有必然关系吗？
+      2.单发射和多发射与流水线的关系。
+      3.多发射CPU是否存在多条流水线？
+        回答概览：
+        a.单条高度复杂的流水线;
+        b.多条并行的流水线;
+  )
+But in general, this is a hard problem to solve. In fact, instruction scheduling.. any realistic(adj.现实的,实际的) formulation(n.(计划的)制定) 
+of instruction scheduling is NP-complete [brief laughter?]. Okay? So, in fact, only minimizing one of this two objectives, with 
+the number of cycles or the number of registers, is in general, NP-complete.
+So, even if our only objective(adj.客观的,就事论事的,基于事实的;n.目标) is finding the ordering that will minimize the number of cycles.
+Even then, with long latency instructions, that's an NP-complete problem. And even if our sole(adj.唯一的) objective is minimizing 
+the number of registers, that's an NP-complete problem. 
+So, what's an NP-complete problem? How would you define NP-complete? Yes?
+>> It's equivalent to.. it's a class of problems that are all equivalent to each other. That have no polynomial time solution.
+Yes. Yeah. So, there is no polynomial time solution. Which means there is no polynomial time algorithm that can always computethe optimal
+solution to this problem. There is no polynomial time algorithm. Not having a polynomial time algorithm, means that the algorithms that you
+have are exponential(adj.指数的;幂的;n.指数). Super polynomials. So, they're exponential or factorial(n.阶乘;adj.阶乘的;因数的). And exponential
+and factorial algorithm take a long time.
+  n = 100
+  2^100
+And for practical purposes, if you have, for example, a problem with, n equals 100. So, in our case, so, n is the number of instructions.
+So, 2 to the power 100. So, this is a huge number. So, if you do the math for this, this you will get, millions of.. millions of billions
+of years. So, it means that if you want to run an algorithm, an exponential algorithm that will be trying to find the best order, in this
+case. It's going to take billions of years, in the worst case, okay? 
+So, compiler, that's why compiler don't solve this problem exactly(adv.完全地,确切地). So, they use certain(pron代词.某些;) heuristics(n.启发式).
+And these heuristics hopefully, work well, in most cases. But not in all cases. So, a good heuristic is a heuristic, an algorithm that
+is not guaranteed(v.保证;adj.必然的) to(g..to短语.保证) give you the optimal solution.
+But it gives you something close to the optimal solution, in most cases. This means that, there may be some, extreme(adj.极端的;n.极端) cases 
+where this algorithm will not give you the best results.
+Now, if you are.. the question is, if you are designing an algorithm for instruction scheduling? Should you focus on minimizing the number
+of cycles? Or focus on minimizing the number of registers? Now, again, this depends on the target architecture.
+And in fact, if you are generating this code for an out of order processor, out of order processor. 
+  out of order processor
+What does an out of order processor do, in this case? Why is there, knowing whether the processor is out of order or in order, why does it
+matter?
+>> Because you have.. a processor will do what the schedule two will do automatically.
+Yeah, exactly(adv.完全正确). So, hopefully, the out of order processor, the out of order processor is going to do this at runtime. Well, but 
+it's not going to do a perfect job. It's going to do a good job. Nothing is perfect, by the way. The processor is not perfect. And the 
+compiler is not perfect. So, nothing in the system is perfect. 
+But an out of order processor will be trying to do something like this(schedule 2). You know, hiding the latencies. And in fact, it will 
+be using internal(adj.内部的) registers that are not visible to the programmers, to achieve more paralleism.
+So, if you have an out of order processor, then you better focus on minimizing the number of registers. You better focus on minimizing the
+number of registers. Because as(由于) we have seen in the register allocation lecture(n.讲课;v.讲课;), last lecture. If you need more registers
+than what the machine has, the register allocator is going to generate what? 
+>> Stores and reloads.
+Stores and reloads. And we call those what?
+>> Spins. (应该为字幕错误,应该为spills)
+Spin(应该为spill) codes. It's going to generate spin code. So, if your processor has out of order execution. And it has a good out of order 
+execution engine, you better focus on minimizing the number of registers. Because minimizing the number of registers needed, is going to 
+cause the register allocator to generate fewer spills. Fewer loads and stores. So, that's much more important than minimizing the number 
+of cycles. Because the processor is going to try to minimize the number of cycles.
+Now, will the processor do a perfect job at this? The processor has limitations. So, in terms of scheduling to minimize the number of 
+cycles. So, can you think of a limitation of the processor?
+>> The main one is once it gets done with the loads, it's dependent on the result. So, the multiply and divide, before it can go to the add. 
+Well, in this case, yeah. So, it's.. well, in fact, we'll assume that the, the processor will have.. so, if you present(vt.提交) 
+this(schedule 1 1.) to a processor, it's going to do the load. Then it will do the load. Then this multiply, is dependent on the load.
+But because the multiply is dependent on the load, the processor is not going to stop. So, it's going to go.. and that's what out of order
+exectution. So, it's going to start the load. While this multiply is waitiong for its results. So, at runtime, the processor will be 
+starting the load, before the multiply completes. So, it's going to start the multiply. It's going to issue the multiply. But the multiply 
+will not.. before the multiply completes, it's going to start the load, trying to do more parallelism. But what are the limitations of 
+the processor? Why is the processor limited? I mean, why can't the processor do a perfect job? Can you think about limitation? Yes? 
+>> It can only look so far ahead.
+Exactly. It can only look so far. So, this is going to be in the reorder buffer. So, there is a buffer.
+  +-----------------+
+  | reorder buffer  | 64 96        (重排缓冲器)
+  +-----------------+
+These can look only at a limited scope, what can fit in a buffer, in a certain buffer. So, it's not going to look, at the entire program.
+And that reorder buffer will have tens of instructions in it. Only tens of instructions. Maybe 64, 96. I don't know, maybe they have 
+gotten bigger now. Maybe 128 or something. But that's about, the range for a reorder buffer. So, the processor can only look at this 
+limited scope. Which is the size of the reorder buffer. 
+While the compiler, can look at the bigger piece of code. Even though there are limitations on the compiler side, too. So, the compiler..
+there is no compiler that schedules a whole program at once. Because Scheduling a whole program at once is just too complicated(adj.复杂的).
+  (意译：因为一次性调度整个程序实在太复杂了。)
+But you don't expect the compiler to schedule, a million-line program. And, you know, move the, you know, the line number one, put it at
+the end. So, it's not going to do this at the scope of the whole program. It's going to divide the program into pieces, into scheduling
+regions(n.区域). And these scheduling regions are limited in size, too. But they can be bigger than the reorder buffer on the hardware.
+So, the size of the scheduling region, the compiler may look at hundreds of instructions. And sometimes thousands of instructions, at 
+the same time. So, it can do thousands, sometimes.
+But not.. but what about what?
+>> Sorry to interrupt you. But I was thinking, what about the.. a lot of processors today have jumped prediction(指的是分支预测).
+>> So, how does that factor into this, too? Although, we don't have any branches in this code?
+Yeah, So, branches make things even more complicated. They make them more complicated for the hardware. And they make them more complicated
+for the compiler. Because.. in fact, having branches is one of the resons why a compiler cannot look at the big piece of code.
+Usually, the compiler stops at the branch. So, it's branches define the boundaries(n.边界,界线) of scheduling regions.
+You know, usually a compiler does a basic block. But it's something that we will be introducing later.
+  basic block
+And the same thing for the machine. If the hardware starts to execute beyond the branch. So, that's speculative(adj.推测的) excution(推测执行).
+That may get.. it can not commit it, right? The hardware cannot commit what gets executed, after conditional branch. Until that branch
+is the result.
+So, again, the branch is an obstacle(n.障碍) for the hardware, as well. The branch complicated things. But all meaningful programs have
+branches, have conditional branches. Can you imagine a meaningful program without if else? So, it's not going to be very useful.
+You have the if else and you have the loops. The loops are also backward branches(循环也是向后分支...). So, without conditioners and without
+loops, you're not going to write a meaningful program, a useful program. So, a useful program makes things complicated.
+All right, so, now we have, we know what the instruction scheduling is. We know what the register allocation is. And they conflict with
+each other. So, minimizing the number of cycles, conflicts with minimizing the number of registers. And this is typical for compiler 
+optimizations to conflict with each other, to interact with each other.
+So, improving something, can make something else worse. That's why optimizing code, generating, you know, good code, efficient code,
+is a non-trivial(不平凡的) task. There are lots of tradeoffs(n.交易). Lots of conflicting objectives(目标). And that's why it's a very
+complicated process. And, there is no compiler that can generate perfect code all the time. Compiler hopefully generate good code, in
+most cases.
+Okay, Any questions? So, this.. yeah?
+>> Are out of order processors coming?
+Yeah. So, Intel x86, is an out of order processor. So, that's the prominent(adj.突出的) processor on desktop and laptops and work stations.
+So, Intel x86 is out of order.
+Even Arm processor, the modern Arm processor are out of order, these days.
+>> inaudible???.
+Yeah. Yeah and of course, Intel and AMD, they are both out of order.
+Okay, other questions? Okay, so, basically this ends our extended overview of compilers. So, what we have covered so far is the what?
+You know, what compilers do. And what the different parts of the compiler do. We haven't studied the low. You know, the algorithms that
+are used. So, we started the concept of instruction scheduling. But we haven't started a specific algorithm for doing instruction scheduling. 
+So, from next lecture, we will start studying the algorithms for the different parts of the compiler. And what will be the first part that 
+we will be studying?
+>> Scanning.
+Yeah. What's the first part in the front-end? What's the first phase in the front-end? Scanning, Yeah. So, next time we will start studying
+scanning. How scanning is done, using finite optometer(字幕应该错了,应该为automata) and regular expression, okay?
+
+
+
+
 
 
 
