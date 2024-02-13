@@ -1795,7 +1795,12 @@ So, basically by reducing the number of cycles, requires more registers. Nothing
 Because here(schedule 2) you are doing more things than(字幕应该错了,应该为in) parallel. You are doing 4 instructions in parallel. 
 You need 4 reigsters.
   (附加： 
-    AI解惑,AI_Compiler.md:问题：4 instructions in parallel如何理解？
+    AI解惑,AI_Compiler.md:
+    问题：并发和并行是什么,有什么区别？
+    回答概览：
+      并发指的是在同一时间段内能够处理多个任务的能力;
+      并行则是指多个任务在同一时刻真正地同时执行;
+    问题：4 instructions in parallel如何理解？
     回答概览:
       1.支持多发射技术的处理器,可以在一个时钟周期内启动并处理多条独立的指令;
       2.在单个CPU核心内部,通过指令级并行Instruction-level parallelism, ILP技术;
@@ -1803,6 +1808,7 @@ You need 4 reigsters.
     回答概览:
       流水线技术,超标量技术,乱序执行,分支预测,推测执行,软件编译优化.
   )
+  (个人理解：各指令的延迟可看成是恒定的...待补全)
 You need containers for these to stir(v.搅拌,(使)活动;n.搅拌;) the result of these. So, it's just like you're cooking, for example.
 If you are trying to cook and you trying to cook in parallel. And if you want to cook, meat, rice and vegetables at the same time.
 Then you need at least 3 containers, right? You cannot do it with 2 containers. If you have 2 containers, you cannot cook 3 things
@@ -1865,6 +1871,7 @@ And these heuristics hopefully, work well, in most cases. But not in all cases. 
 is not guaranteed(v.保证;adj.必然的) to(g..to短语.保证) give you the optimal solution.
 But it gives you something close to the optimal solution, in most cases. This means that, there may be some, extreme(adj.极端的;n.极端) cases 
 where this algorithm will not give you the best results.
+重点标记*:
 Now, if you are.. the question is, if you are designing an algorithm for instruction scheduling? Should you focus on minimizing the number
 of cycles? Or focus on minimizing the number of registers? Now, again, this depends on the target architecture.
 And in fact, if you are generating this code for an out of order processor, out of order processor. 
