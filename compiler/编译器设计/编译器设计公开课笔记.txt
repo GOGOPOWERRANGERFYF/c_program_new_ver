@@ -1831,6 +1831,8 @@ on the target processor that you are trying to generate code for.
 So, in this case, for example, if you have four physical registers available, then you can go ahead and do this more in section level
 parallels. And minimize the number of cycles. And that will work out well.
   (附加：section level parallels, 这里的section指的是程序中的某一段可独立处理的代码区域.
+        这里的“section level”可能指的是函数、循环体或其他能够独立分析和优化的代码段。当有足够的物理寄存器用于暂存变量时，编译器能够更好地挖掘并实现这些段
+        内的并行性，提高程序的运行效率。
    AI解惑：AI_Compiler.md:
    问题：问题：可独立处理的代码区域是什么意思？
    问题：编译原理中，So, in this case, for example, if you have four physical registers available, then you can go 

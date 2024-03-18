@@ -19,7 +19,8 @@ optimizer 优化器
     数量级(order of magnitude)的差距.
 
 backend 后端
-    顺序/线性 (low level 底层的)中间表示 例如: ILOC, 编译器设计公开课的板书使用ILOC的速记(shorthand);
+    顺序/线性 (low level 底层的)中间表示 例如: ILOC(intermediate language for an optimizing compiler),
+    编译器设计公开课的板书使用ILOC的速记(shorthand);
     low level的优化;
 
     1.instruction selection
