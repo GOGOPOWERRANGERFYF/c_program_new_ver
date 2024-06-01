@@ -45,4 +45,8 @@ backend 后端
     3.instruction scheduling
 
 
+δ 读作 /deltə/
+ε 读作 /epsilən/?
 
+“Deterministic Finite Automaton” 是单数形式，指的是单一的一个确定有限状态自动机。
+“Deterministic Finite Automata” 是复数形式，用于提及多个这样的自动机。

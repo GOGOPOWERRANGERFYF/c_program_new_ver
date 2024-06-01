@@ -1278,7 +1278,7 @@ And for the add, 1 cycle.
 Usually we mention the ones that are not.. that are greater the one.
 The instructions that have the latency(延迟) greater than one. And everything else will by default, has a latency of one.
 (默认情况下，其他所有东西都有一个延迟。)
-So, but in this case, we only have the add. So, we just mention it explicitly(明确地). 
+So, but in this case, we only have the add. So, we just mention it explicitly(adv.明确地). 
 Okay, so, with these latencies, let's try to count the number of cycles that this sequence of code is going to take.
   start    end  
   ----------------------------------------
@@ -1964,11 +1964,409 @@ scanning. How scanning is done, using finite optometer(字幕应该错了,应该
 
 
 
+### Lecture 3: scanning(1) finite automata & regular expressions
 
+Today we'll talking about scanning.
+So in the previous lectures, you know we went through an overview of compilers.
+And we now know the - the main parts, the main components of a compiler and we know what each one of them does. And today we will start learning
+how each of these components or parts or phases in the compiler does it work.  
+So the first part of the compiler that we will start discussing is the scanner. How compilers do scanning. 
+And compiler do scanning using finite automaton and regular expressions.
+So we will start by reviewing the concept of finite automaton and regular expressions.
+So I will assume that you are already familiar with them, but we are just reviewing them and we are emphasizing(v.着重) some of the important 
+concept that we need. So and then we will you know, explain how these are used in building a scanner.
+Okay? So in the.. in your theory of computation class.. Theory of computation CSC135 the class was about the notion of language.
+So what's the definition(n.定义) of a language in theory of computation? What is a language? 
+>> inaudible???
+Okay so regular expression and automaton these are tools for recognizing languages.
+But what is a language?
+>> inaudible???
+Well a context free grammar is another tool for recognizing another kind of language, yeah?
+>> I'm not sure if I remember the definition exactly, but it's finite set of symbols that various combinations mean -
+>> mean difference things.
+Well in fact, it's .. well symbols constitute(vt.组成,构成) the alphabet(n.字母表;(一种语言的)全部字母).
+So the alphabet is a bunch of symbols. The alphabet is a finite set of symbols.
+    Alphabet : Finite set of symbols
+Then the string.. what's the string?
+>> inaudible???
+Yeah it's a sequence of symbols from the alphabet.
+So a string over an alphabet is a string.. sorry. Is a sequence using the work(字幕错误?是word?) that's undefined, which is a terrible thing to do?
+Sequence of symbols from the alphabet. So what's a language?
+>> inaudible???
+Okay, so okay so concept wise(从概念层面).. so the grammar is just a tool for recognizing language.  
+So finite automaton, regular expressions, grammars these are tools for recognizing languages.
+A language is just a set of strings. It's just a set of strings.
+    Alphabet : Finite set of symbols
+    String : sequence of symbols from a given alphabet
+    Language : set of strings
+So this is what we call a formal(adj.正式的;正规的) language(形式语言); So the language in your theory of computation class is what we call a formal language.
+    Alphabet : Finite set of symbols
+    String : sequence of symbols from a given alphabet
+    Language : set of strings
+        |
+        V
+    formal language
+To distinguish(v.区分) it from human languages or natrual languages and distinguish it from programming languages. 
+So these is a relation between a programming language and a formal language that we will be understanding in this course.
+A formal language, the language that you studied in 135 in your Theory of Computation is a general concept. So.. and a set of strings is a language.
+Whether that set of strings is interesting or uninteresting that doesn't matter. It doesn't have to be an interesting language.
+It doesn't have to be meaningful. It doesn't have to be useful. Any set of strings is a language, okay? 
+Now in.. in this course we will be defining some languages that are useful. 
+In particular for a programming language when we are building the scanner, we are basically defining the language of all possible tokens in that 
+language, all legal(adj.合法的,法律的) tokens in the language. 
 
+You know for example, X one, two equals 32.
+  X12 = 32,
+Okay? So this is a string and this string has you know these four difference tokens; 
+  X12               =             32           ,
+  ---              ---            --           -
+  this token(1)                              this(2)
+  identifier  assignment  unsigned interger   end of statement
+  ----------  ----------  -----------------   -----------------
+  This(1)     this(1)                           
+so we are looking for a mechanism(n.机件) for recognizing.. recognizing tokens that are legal tokens.. so what we will be defining some rules.
+We will be setting some rules to define the legal tokens in programming language. 
+So this token(1).. this is an identifier. This is a variable name. This is the assignment, operator and this is the constant interger unsigned integer.
+And this is the end of statement. Okay so what we will be doing here is that we will be defining a rule for each of these parts of speech. 
+And in fact, a string that has a number of valid tokens, is a string that belongs to the language that is the union(AI.并集) of all these languages.
+So, the language of all legal identifiers is a language, is a formal language. The language of all legal identifiers. 
+The language of all legal unsigned integers is another language.
+The language of assignment operators is a language that has a single string in it, which is this operator.
+So this(1) is a language that has only a single string in it.
+This(1) is a language that has all legal identifiers in it.
+And a language that has all legal unsigned integers in it and a language that has all legal end of statement characters in it, which is a language
+that has a single string in it. So this language has a single string in it, which is only this(2).
+And the language now the union of these languages is going to give us the language that has all valid programs, all valid programs at least at 
+this level, you know at the scanning level. 
+-----> 标记 20240519
+A valid program is a program at this point, you know from scanning point of view. We haven't gotten to parsing yet.
+From scanning point of view, a valid program is a program that consists of a sequence of valid tokens. And each token belongs to a valid part of speech.
+So the part of speech here is identifier and this is a valid identifier. Okay, so this will become clear when we.. when we give specific rules for 
+recognizing these languages. But for now let's.. let's continue our.. our review of the concepts of you know, formal languages and finite automaton
+and regular expressions. So finite automaton and regular expressions are tools for recognizing languages. And what does it mean.. what does recognizing
+a language mean precisely(adv.精确地,准确地)? 
+>> Inaudible???
+It will not accept language.. it will accept the string. So given a string it tells you whether that string belongs to the language or not.
+This is what recognizing a language means. It means this tool, which his a finite automaton or a regular expression takes a string and it tells you 
+whether this string belongs to the language or not. It's a valid string for that particular language or not. 
+Okay? So now the question is what kind of languages are recognizing by finite automaton and regular expressions? What do we call the languages that are
+recognized, that can be recognized by finite automaton and regular expressions? 
+>> Regular.. 
+Yeah regular languages. Exactly, So, regular languages can be recognized using finite automaton and regular expressions. 
+Is there another.. another tool that can recognize regular languages? 
+So there is another tool that you have probably studied in 135 that can recognize regular languages. 
+In addition to finite automaton and regular expressions. 
+>> Regular grammar?
+Yeah exactly, regular grammar, so it can also use regular grammar to recognize regular languages. 
+Okay, so we will not say much about regular grammar here. We will focus on finite automaton and regular expressions.
+So let's take an example of a regular language that can be recognized by finite automaton. 
+So the language is language L, which consists of the set of strings W, such that W contains 101 as a substring.
+  Example
+    L = { W | W contains 101 as a substring}                             DFA
+    DFA for L                                                            NFA
+So this is an example. Now we can you know, build a finite automaton and we can build a regular expression or we can write a regular expression for this.
+So let's first do a DFA for L. What is a DFA? 
+Deterministic finite automaton. So we have a DFA, deterministic finite automaton and NFA, non-deterministic finite automaton.
+Okay so let's do our deterministic finite automaton. So for this.. so we need to recognize a language that contains this as a substring. 
+So obviously we have to have this substring encoded somewhere in the automaton. Then we will decide what to do next. So this string must appear somewhere, 
+substring that we're trying to recognize. 
+  Example
+    L = { W | W contains 101 as a substring}                             DFA
+    DFA for L                                                            NFA
+           1       0       1                               DF
+  --->(S0)--->(S1)--->(S2)--->(S3)                        (  )--->
+    states(1): S0,S1...                                      \
+                                                              +--->
+Now okay, in a DFA how would you define the DFA? And how does it differ from an NFA? Yes please?
+>> The deterministic finite automaton every single path is mapped out no matter what, you don't have.. so even basically.. sorry. 
+Every single path has to be mapped out. It can't be uncomplete like a non-deterministic. 
+Okay, so if I have a state here. So these are what we call states(1), right? 
+So what are the restrictions(n.限制;约束;) that I have when I'm buliding a DFA on a state? So what are the conditions that I have to satisfy in order 
+for my finite automaton to be a deterministic finite automaton? Yes? 
+>> Inaudible???
+Well I have to have one edge for every.. 
+>> For every impossible state that it can be in. 
+No, not for every possible state. I have to have one edge for every..
+>> Input possiblility. 
+No
+>> Inaudible???
+Exactly, for every symbol in the alphabet. So I have to have one transition(n.转变;过渡;v.转变过程;过度), one edge(n.边;边缘) for every symbol in the alphabet.
+AI翻译和理解：
+问题：Exactly, for every symbol in the alphabet. So I have to have one transition, one edge for every symbol in the alphabet.在编译原理上下文中，翻译这句英文。
+回答：确切地说，针对字母表中的每一个符号，我必须为每个符号设定一条转移，即字母表中每个符号都对应一条边。在编译原理的背景下，这意味着对于定义好的输入字母表中的每一个可能的输入符号，
+确定性有限自动机（DFA）或类似结构都需要有一个明确的转移规则，确保从当前状态转移到下一个状态的路径是为所有符号预先设定好的。这样，无论输入序列如何，自动机都能够按照这些规则正确地
+进行状态变迁。
+So if my alphabet, by the way in fair of competition we tend to use sigma equal zero, one as our default alphabet. 
+You know this is simplest alphabet that we can use for explaining ideas, so for every symbol in the alphabet you have to have a transition. And you have to
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             DFA
+    DFA for L                                                            NFA
+           1       0       1                               DF  0
+  --->(S0)--->(S1)--->(S2)--->(S3)                    DFA (  )--->
+    个人备注：states(1): S0,S1...                              \ 1
+                                                              +--->
+                                                      so this is a DFA(1)
+have exactly one transition for every symbol, so this is a DFA(1). 
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             DFA
+    DFA for L                                                            NFA
+           1       0       1                               DF  0
+  --->(S0)--->(S1)--->(S2)--->(S3)                    DFA (  )--->
+    个人备注：states(1): S0,S1...                              \ 1
+                                                              +--->
+                                              ---------------------------------------
+                                                                0
+                                                              +--->
+                                                             / 1
+                                                          (  )--->      NFA
+                                                             \ 1
+                                                              +--->
+why if you have something like this.. You have two transition for one then this is not a DFA. This is an NFA. 
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             DFA
+    DFA for L                                                            NFA
+           1       0       1                               DF  0
+  --->(S0)--->(S1)--->(S2)--->(S3)                    DFA (  )--->
+    个人备注：states(1): S0,S1...                              \ 1
+                                                              +--->
+                                              ---------------------------------------
+                                                                0
+                                                              +--->
+                                                             / 1
+                                                          (  )--->      NFA
+                                                             \ 1
+                                              ---------------------------------------
+                                                               1
+                                                          (  )--->      NFA
+If you have this.. if you have a transition for a one, and you don't have a transition for a zero, then this is not a DFA. This is an NFA.
+And what else can you do in an NFA and cannot do in a DFA? What else.. what's that important thing that you can do in an NFA, but cannot do in a.. 
+yes Eric?(提问课堂学生...)
+>> Backtrack.
+No, no, no in terms of defining transitions.
+>> The lambda symbol？
+个人备注：epsilon（ε 或 Ε）和 lambda（λ 或 Λ）都是希腊字母表中的字母。
+Yeah okay, the empty string, the epsilon(n.希腊字母表的第5个字母), the empty string. Whether you call it lambda(n.希腊字母表的第11个字母) or epsilon we will call 
+it epsilon here. 
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             DFA        
+    个人备注：AI_Compiler.md有L的详细解释
+    DFA for L                                                            NFA
+           1       0       1                               DF  0
+  --->(S0)--->(S1)--->(S2)--->(S3)                    DFA (  )--->
+    个人备注：states(1): S0,S1...                              \ 1
+                                                              +--->
+                                              ---------------------------------------
+                                                                0
+                                                              +--->
+                                                             / 1
+                                                          (  )--->      NFA(1)
+                                                             \ 1
+                                              ---------------------------------------
+                                                               1
+                                                          (  )--->      NFA(2)
+                                              ---------------------------------------
+                                                               ε
+                                                          (  )--->      NFA(3) 
+So if you have something like this, an epsilon transition then you know this is not a DFA, this is an NFA.
+Okay, so when you are building a DFA, you have more restrictions, so the DFA is more restricted(adj.受限制的;受约束的;v.限制).
+You have to have exactly one transition for every state out of every state you have to have exactly one transition for every symbol in the alphabet.
+If you have multiple transitions for one symbol that's an NFA(1). 
+If you have symbols that do not have transitions at all, then that's an NFA(2).
+And if you use the epsilon, the empty string transition that's.. that's not a DFA, that's an NFA(3).
+Okay? Now which one is easier to work with? 
+>> NFA
+Yeah the NFA is easier because there are less restrictions. You don't have the restrictions. You can do.. you have more flexibility.
 
+So in this case let's do a DFA. 
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             
+    DFA for L                                                            
+           1       0       1          
+  --->(S0)--->(S1)--->(S2)--->(S3)    
+Now we are more restricted, so we have to figure out(解决;算出;弄清楚) the actual transition for every state.
+A transition for every symbol. So what we have on the board now is not a DFA. 
+It's not defining what to do for every symbol in the alphabet.
+So now we to.. determine(v.确定) what will happen if we have a zero. 
+We just stay.. we're not making progress towards the goal. The goal here is to get one zero one. 
 
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             
+    DFA for L                                                            
+         0           1(*1)
+       +----+      +----+
+       |    |      |    |
+       |    V  1   |    V  0       1(*2)          
+  --->(  q0  )--->(  q1  )--->(q2)--->(q3)                        
+  个人备注：原来是q,之前的写成S懒得改了。。。知道就行了.
+So if we're getting a zero, we're not making progress. So now this zero is done.
+We have defined all possible transitions for all the symbols.
+For Q1 we're saying okay if we get a zero and we are here(q1) then we are making further progress.
+But what if we get a one.. go back to Q zero(q0)?
+Yeah we stay here because we already have the one. Right? So if we get a one then we are staying here because now the last one(*1) that we got.. the last one
+that we have read becomes the first symbol in the substring that we are trying to recognize. 
+>> All right.
+Okay? So now we have defined all transitions for Q0 and Q1. 
+Now for Q2, if I get the one(*2) then that's what I'm looking for.
+If I get a one when I'm here, I get the one that I have already seen a one an a zero.
+So I have seen the substring that I'm looking for. 
+If I get a zero, I have to start over, right?
+                                                        final state
+                                                        accept state(接受状态)
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             
+    DFA for L                                                            
+         0           1                    0,1
+       +----+      +----+               +----+
+       |    |      |    |               |    |
+       |    V  1   |    V  0       1    |    V      
+  --->(  q0  )--->(  q1  )--->(q2)--->((  q3  ))
+          ↑                     |
+          |                     |
+          +---------------------+
+                     0
 
+          1          0          0 (个人备注：读取的字符串,读到第二个0,start over重新开始读取:substring子字符串:字符串中还没读取的剩余部分,目标读取101)
 
+If I get a zero here it's just like getting one zero zero then I would have to start over(重新开始;重头再来;) because I'm looking for 101.
+So if I get a zero start over. Now I need a one in order to start recognizing that substring that I'm looking for. 
+Okay is this complete? 
+>> No.
+No it's not complete. What else do we need?
+The final state, where is our final state here? Yeah the last one(备注:q3). So this(备注:q3) is the final state. We distinguish this with a double circle;
+So this is what we call a final state or an accept(接受状态)(字幕错误,下同) state. 
+Final state or accept state. What else is missing? Yes?
+>> When you're in the final state, you can still accept more zeros and ones.
+Yeah, so when I'm in the final state, when I'm here already seen the substring that I'm looking for.
+So after that point whatever I get this string is satisfying the condition of the language. 
+This string I know that this string already belongs to the language.
+So no matter what I get here(q3) I would stay in the final state. 
+The string has already satisfied the requirement to be a member of this language that I'm trying to recognize.
+Okay? So this is a DFA.. 
 
+Now let's do an NFA for language L.
 
+  NFA for L
+
+Now if.. if I'm asking you this question in the exam(n.(笔头,口头或操作)考试;体检;) and I'm asking for an NFA for this language, 
+would this(上上一个板书中的NFA for L图示) be a correct answer?
+>> Yes.
+Yes it will. Because the DFA is an NFA. The DFA is the one that is more restricted, so every DFA is an NFA.
+
+  Example                 ∑ = {0,1}
+    L = { W | W contains 101 as a substring}                             
+    DFA for L                                                            
+         0           1                    0,1
+       +----+      +----+               +----+
+       |    |      |    |               |    |
+       |    V  1   |    V  0       1    |    V      
+  --->(  q0  )--->(  q1  )--->(q2)--->((  q3  ))
+          ↑                     |
+          |                     |
+          +---------------------+
+                     0
+  Every DFA is an NFA
+  But not every NFA is a DFA
+
+  AI_Compiler.md -> ### 问题：如何理解every DFA is an NFA？
+
+It's easier to be an NFA. To be a DFA is harder because there are more restrictions, 
+but not every.. the opposite(adj.相反的;对面的;n.反面;对立面;prep.与..相对;与..合演;adv.在对面) is not true.
+But not every.. the NFA is a DFA. The opposite is not true.
+But let's now write an NFA, take an advantage(n.优势;有利条件;) of(短语.利用) the.. you know the convenience(n.便利) and flexibility of the NFA.
+  NFA for L
+      here(1)                           here(2)
+       0,1                               0,1
+      +-----+                          +-------+
+      |     |                          |       |
+      |     V  1           0       1   |       V
+  --->(  q0  )--->(  q1  )--->(q2)--->((  q3  ))
+
+We have to think about everything, you know for an NFA we can just say okay in order to have this substring or what I need is one zero.
+One and then.. and this is my accept state and what else? 
+what do I need to add in order to make this a valid NFA for this language?
+So this is the string(101) I'm looking for. But what will be before it or after it?
+MT? No not MT. I'm looking for a string that has this(101中的0?) as a substring, so before this string or after it, what can I have?
+Anything I want, so how do I express this anything? How do I say anything?
+In the.. using the NFA? 
+>> Like a star something?
+Okay that's a regular expression. So it's.. so here(1).. so I just loop here(1). 
+So I can say whatever I get here(1) I can loop and I can loop here(2). 
+So a loop.. A loop in a finite automaton corresponds(v.相当于) to a star(理解:正则表达式的*) in a regular expression.
+So starting is repeating or looping.
+So what I'm saying here is that okay, I'm looking for a string. That has one zero one(101), as a substring and before it(q0), I can have anything,
+after it(q3), I can have anything. So this makes an NFA easier to write than a DFA.
+Why is it easier? Because we didn't have to explicitly(adv.明确地;明白地;) cover all the transitions.
+So for example from Q0 we have two possible transitions for one.
+So if we are in Q0 and we get a one there are two possibilities. We either stay in Q0 or go to Q1(either or 不是...就是...). And this it the non-determinist.
+This is what makes it non-deterministic. It is non-deterministic in the sense(短语:在某种意义上;) that when I'm here(q0) and I got a one, 
+I have two possibilities.
+And the DFA there is exactly one possiblility(根据上下文翻译:这里只有一种确定的可能). When you are in a given state, and you get a certain symbol then there is always
+one possiblility.
+Here you have multiple possibilities. And sometimes you don't have.. so if you are in Q1 and you get a one, what does this mean? 
+Not explicitly(adv.明确地) saying what will happen if you are in Q1 and you get a one. 
+>> Zero.
+>> Back up to Q0.
+Well we're not saying go back here. So when we are not explicitly giving a transition in an NFA, what does this mean? What does it correspond to in a DFA?
+>> Infinite.. it goes into the I guess trap state where it loops back into itself constantly(adv.不断地;一直;始终)?
+Yeah it goes into a trap state. It is like we are dead.. it's a dead path.
+But the good thing about the NFA is there(q0) are multiple paths. Okay so there(q0) are multiple paths.
+So the NFA is a compact(adj.紧凑的) way of representing you know, multiple paths in a more compact way. Usually the NFA is more compact than the DFA.
+  AI_Compiler.md -> 
+    ### 问题：如何理解Usually the NFA is more compact than the DFA？
+    ### 问题：举例说明NFA比DFA更紧凑。
+    ### 问题：一台识别语言A的DFA M=(Q,∑,δ,q0,F)，里面的符号分别表示什么？
+  课外资料：《计算理论引导》第3版 P33 1.2.2 NFA与DFA的等价性 定理1.19 证明思路
+It's not clear in this example(上面DFA for L和NFA for L的板书例子), but it's.. it's more compact because it's encoding multiple paths and multiple possibilities.
+So it's telling you here, Q0(q0), when you have Q0 and you're getting a one, you can go here(q1), and but you can stay here(q0). Both possibilities are there.
+So which possibility should I do? All possibilities.
+So in order to determine if a given string belongs to a language or not you have to find at least one path that leads from a start state to an accept state.
+If you can't find one path, then it's accept. If you cannot find any path, then it's reject. And there are many paths. 
+Okay? In fact this will become clearer when we look at the convergence(n.收敛) from an NFA to a DFA.
+So in 135 you have seen an algorithm or a procedure(n.程序) for converting an NFA to a DFA or a DFA to an NFA. An NFA to a DFA.
+A DFA does not need to be converted to an NFA because it's already an NFA.
+But an NFA is not necessarily a DFA so there is a procedure from converting an NFA to a DFA. And what's the name of that procedure? 
+It should be.. the name of the procedure has to do with the way it's.. it works, it's the subset construction. 
+  NFA for L
+      here(1)                           here(2)
+       0,1                               0,1
+      +-----+                          +-------+
+      |     |                          |       |
+      |     V  1           0       1   |       V
+  --->(  q0  )--->(  q1  )--->(q2)--->((  q3  ))
+
+                              Subset construction
+
+It's called the subset construction. 
+  NFA for L
+      here(1)                           here(2)
+       0,1                               0,1
+      +-----+                          +-------+
+      |     |                          |       |
+      |     V  1           0       1   |       V
+  --->(  q0  )--->(  q1  )--->(q2)--->((  q3  ))
+
+We will cover the subset construction in detail in.. in one of the next lectures.
+
+So today we're only trying to cover the.. the basic concepts of NFA's and DFA's. 
+  NFA for L
+      here(1)                           here(2)
+       0,1                               0,1
+      +-----+                          +-------+
+      |     |                          |       |
+      |     V  1           0       1   |       V
+  --->(  q0  )--->(  q1  )--->(q2)--->((  q3  ))
+
+Okay, so now the power of the NFA's we can see it in an example like this.
+  NFA for L
+      here(1)                           here(2)
+       0,1                               0,1
+      +-----+                          +-------+
+      |     |                          |       |
+      |     V  1           0       1   |       V
+  --->(  q0  )--->(  q1  )--->(q2)--->((  q3  ))
+---------------------------------------------------------
+  L = {W|W contains the substring 101 
+         or the substring 111}
+
+If L is W [Inaudible: such that?] W contains.. the substring 101 or the substring 111. 
+Okay so this is something that we can do easily with an NFA.
