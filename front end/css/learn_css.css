@@ -1,0 +1,613 @@
+/* CSS cascade stylesheet 层叠样式表 
+    终于能形象理解层叠样式表了，子元素样式表层叠在父元素样式表上
+
+    并集选择器：选择器1, 选择器2 {}
+
+    DOM document object model
+
+    每个盒子四个部分/区域: 
+        margin  边缘/外边距
+        border  边界
+        padding 填充/内边距
+        content 内容
+
+    MDN Web Docs(文档)的box-sizing很值得一看
+        content-box 默认
+            width 内容宽度；height 内容高度
+        border-box
+            width/height 边框+内边距+内容
+        注意：border-box不包含margin
+
+    优先级，CSS声明的权重，由选择器类型的数值决定
+    优先级高的规则会覆盖(take over)优先级低的
+    内联    id    类      元素的类型
+    inline > id > class > type
+    优先级相同，最后写的生效(同一个元素多个CSS声明时，优先级才有意义)
+    一个id只能对应一个html元素
+    一个class可以多个html元素使用
+
+    hover 徘徊；
+    a:hover 链接伪类选择器
+    a:active 鼠标点击按下未松开
+    要按顺序，link visited hover active
+
+    ***重点,盒子中文本垂直居中(导航栏应用)小技巧：line-height为盒子高度
+
+    responsive design 响应式设计
+        viewport    针对移动端显示优化
+        media queries
+        flexbox (wrap 包裹)
+        grids
+
+
+    * 通配选择器 universal selector；关系选择符对优先级没有影响?这里还没理解
+    选择页面的所有标签/元素，权重为0，优先级应该是最低的，所以最容易被覆盖
+
+    内联样式>内部样式>外部样式
+
+    继承属性 inherited propety
+        元素的一个继承属性没有指定值时，取父元素的同属性的值
+        典型例子：color属性
+    非继承属性
+        非继承属性没有指定值时，取属性的初始值(应该跟默认值一个道理吧)
+    inherit关键字可显示地声明继承
+
+    CSS基础盒模型：CSS basic box model
+    parent container    父容器
+    child container     子容器
+    子容器padding值太大会撑开父容器？需用margin调整？
+    
+    块格式化上下文(block formatting context:上下文/语境) 
+    <html> 根元素
+    float 浮动元素
+
+    比较重要的要理解的概念:
+        1) [normal flow] of the document 文档的正常流(对盒子模型而言)
+           文档正常流，一个元素一行？
+        2) float属性,元素浮动,后面的元素跳出文档的正常流,直接跟在上一个元素后面
+        3) 还有文档流
+    
+    z-index 类似与图层
+*/
+
+/*
+    CSS三大特性：层叠性、继承性、优先级
+    1、(相同选择器)层叠性
+        相同选择器设置相同样式(样式冲突,有的是部分冲突)时，一个样式会层叠(覆盖)另一个样式
+        原则：后来者居上,后设置的会层叠/覆盖之前设置的
+        内联(行内)样式表>内部样式表>外部样式表
+
+    2、(子元素继承父元素)继承性    
+        子元素继承父元素的样式
+        text-、font-、line-开头的以及color属性
+        行高的继承
+        body {
+            font: 12px/15px
+            font: 12px/1.5
+        }
+        字体大小12px,行高为15px
+        字体大小12px,行高为字体高度的1.5倍
+    3、(选择器)优先级
+        不同选择器选择相同的元素,优先级高覆盖优先级低(覆盖相同的属性)
+        根据选择器权重执行
+        继承或* 0,0,0,0     * {...}
+        元素选择器 0,0,0,1  <h1>header</h1> h1 {...}
+        类选择器 0,0,1,0    <h1 class='classname'></h1> .classname {...}
+        ID选择器 0,1,0,0    <h1 id='idname'></h1> #idname {...}
+        行内样式 1,0,0,0    <h1 style='xxx: yyy,'></h1>
+        !important 无穷大∞
+
+
+        附加:(直接)子元素    table>thead>th (子元素选择器) 使用大于号
+        后代元素    table th    (后代元素选择器) 使用空格
+
+        注意：继承的权重为0 无论父元素的权重多高，子元素继承的父元素属性权重为0，
+             即使父元素的权重设置为!important
+             还有a标签，浏览器默认为其设置了样式，优先级比body高，所以对a标签要指定设置样式
+        
+        权重叠加问题：
+            权重不存在进位
+            权重相加，0,0,0,1+0,0,0,1=0,0,0,2 > 0,0,0,1
+            ul li > li (两个不同的选择器都是选择li)
+
+        盒子模型box model:
+            1、content 内容
+                盒子的width、height默认为content的宽、高
+
+            2、padding 内边距   (填充)
+                padding-top padding-left padding-bottom padding-right
+                简写：padding: 1px (上下左右)
+                     padding: 1px 1px (上下/左右)
+                     padding: 1px 2px 3px (上/左右/下)
+                     padding: 1px 1px 1px 1px (上/右/下/左)
+                padding会撑大盒子(在盒子原始宽高的基础上增加padding）
+                因此，一般的处理方式是增加padding的同时，减小盒子原始的宽和高
+
+                注意：盒子本身设置了width和height，padding才会生效
+                     只设置了width，padding在width方向上的设置才会生效，height同理
+                     子容器设置了width和height，padding之后大于父容器的，子容器的大小会超过父容器
+                     子容器没设置宽和高，则padding不会生效(不会撑开子盒子大小)，在父容器中默认样式怎样就是怎样
+                     
+
+            3、border  边框
+                border-width
+                border-style  
+                    常用的
+                    solid   实线    (实心的) 
+                    dashed  虚线    (猛冲...）  中外差异啊。。。
+                    dotted  点线    (有斑点的)
+                border-color
+
+            简写：border: 1px solid red;
+                 border-top: 1px solid blue; 利用层叠性,语句顺序反过来不行
+            
+                 border-collapse: collapse; 边框塌陷
+            
+                 边框在内容大小的基础上添加
+
+            4、margin  外边距   (边缘)
+                margin简写的语法与padding完全相同
+                应用：1.让块级元素水平居中，块级元素必须设置宽和高，然后通过margin左右auto，
+                     即可实现块级元素水平居中
+                     2.让行内元素和行内块元素实现水平居中，给父元素添加text-align: center;
+                        这两种元素上下方向是无法撑开的(撑开无法对相邻元素产生影响，所以这种"撑开"没实际意义)
+                
+                外边距合并/塌陷问题：
+                (历史发展问题,最初网页只是为文档服务的<不忘初心,牢记使命>,普通流文档才会发生垂直外边距合并问题,
+                p之间,如果第一个p上外边距为设置的上边距,但p与p之间的距离为上p的下边距+下p的上边距,这样文本页面看起来就很不和谐...
+                所以就保留了外边框合并的这个特性，水平的外边框合并在css2.1中已被取消,现在已经css3了)
+                    定义块元素的垂直外边距时，可能会出现外边距的合并
+                    父块级元素与子块级元素，两者同时设置上外边距，父块级元素会塌陷上外边距的较大值    
+                    解决(在父元素)：1.设置边框
+                                  2.设置内边距
+                                  3.overflow: hidden; 过度扩展/延伸: 隐藏;
+                    浮动、固定、绝对定位的盒子不会有外边距合并问题
+            
+            附加：高度塌陷问题，正常流文档中，父元素的高度靠子元素撑起
+                子元素设置成其它position时，子元素脱离正常流文档，因此没有了子元素将父元素高度撑住，父元素高度塌陷
+                    
+            
+            覆盖浏览器默认的内外边距：
+                * {
+                    padding: 0;
+                    margin: 0;
+                }
+            *通配符代表所有标签，这里利用的是CSS的层叠性
+
+    传统网页布局的三种方式：
+        网页布局的本质——用css摆放盒子
+        1、普通流(标准流)   正常流文档(英语直译) 我选择正常流来记忆
+             元素按默认方式排列
+                a.块级元素独占一行
+                b.行内元素从左往右排列,碰到父容器边缘自动换行
+        2、浮动 float
+             让多个块元素无缝隙排一行,常用于横向排列盒子,float不会覆盖文字,position会
+             a.浮动元素会脱离标准流(脱标)
+             b.浮动盒子不在保留原先的位置(其它标准流盒子会占用,浮动元素在上)
+
+             任何元素都可以浮动,添加了浮动属性后,元素具有行内块元素相似的特性
+             实际使用，一般父元素标准流，子元素浮动配合使用，不然浮动元素满浏览器乱飘
+             注意：浮动盒子只会影响后面的标准流,不会影响前面的标准流
+
+             清除clear属性(清除浮动对后面元素的影响,浮动只对后面的元素影响这点很重要,对父元素和前元素都没影响,
+                          理解了这点就能理解方法1这样做的原因)：
+               需要清除的原因：父元素不设置高度，子元素全部浮动后，父元素没有子元素撑开，父元素高度变0
+               方法：
+                1.额外标签法，又称隔墙法
+                    在父元素中加一个空子元素(必须是块元素),设置clear: both属性(基本只用这个属性,还有left,right)
+                    原理，清除块元素左右两边的浮动元素(参考《CSS3权威指南第三版》P303)
+                    子元素清除在它两边的浮动元素,不让浮动元素覆盖在子元素之上(实际效果为把浮动元素顶上去)
+                    子块元素没有设置高度，所以相当于设置子块元素高度为0,我们就看不到该子块元素的存在
+                    但该子元素是存在的，它撑开了父元素，实现了闭合浮动元素在父元素内
+                    缺点：添加无意义标签，结构化较差
+                2.overflow(溢出): hidden scroll auto
+                    overflow: hidden; 在外边距合并/塌陷中也有应用
+                    缺点：无法显示隐藏的部分
+                    overflow如何在这两个情况下其作用还不太理解。。。
+                    overflow: visible; 默认值,溢出可见
+                3.after伪元素清除
+                4.双伪元素清除
+                    2、3、4目前都不明白啥意思。。。先跳过补充这些的前置知识
+                使用清除的的情况:a.父元素没height; b.子元素浮动; c.影响下面的布局
+
+        3、定位 position(定位“飘”得比float还高,覆盖住float)
+           定位=定位模式+边偏移 
+           四个常用的定位模式：static、relative、absolute、fixed
+           边偏移：top、bottom、left、right
+
+           静态(默认的,就是标准流...),默认值,*没有定位
+                不用设置就是这样，设置了也没啥意义？
+                不脱标,不能偏移,所以这有啥实际应用么...
+                把以定位的元素取消定位???
+
+           相对,元素移动时,边偏移相对于元素原来的位置移动;元素移动前的位置保留,相邻盒子不会占用(与float不同)
+                不脱标(不脱标准流),继续保留原来的位置,在标准流中偏移位置
+
+           插入==>额外知识点viewport视口,计算机图形学中,可看见的多边形区域(通常是矩形)
+                 浏览器中,viewport视口为浏览器中网站内容可见部分
+           绝对,边偏移以最近一级的设置了(非static)position属性的祖先元素为基准,
+                如果没有,则以浏览器viewport视口为基准
+                (祖先元素,直接或间接包含后代;父元素,直接包含后代),绝对定位元素脱标,不保留元素原来的位置
+
+           固定,(重点)以浏览器的viewport视口(我们可以通过鼠标改变视口的大小)为参考点移动元素
+                固定定位不占有原先的位置,脱标(脱离标准流)
+                小技巧应用案例：img先定位:固定 left50% 在margin-left版心的一半像素(再加几像素隔开)
+                              不能直接left百分之几一步到位,因为视口调宽之后,img百分比位置相对版心就变远了
+                              而中间的div宽度没变,且还是在可视窗口中间位置
+
+                sticky粘性定位(了解,实际开发中用js实现的多)：
+                    1.以可视窗口为参考点移动元素(固定定位特性)
+                    2.粘性定位不脱标,占有原始的位置(相对定位特性)
+                    3.必须添加top、left、right、bottom其中一个才有效
+            
+            只有设置了position/定位的盒子才有z-index属性
+            定位叠放次序z-index (x轴,y轴,z轴；上下,左右,垂直于页面的高度<盒子重叠>)
+            (一般高度postiong>float>normal flow)
+            z-index: 1;
+            属性值可以是正整数,0,负整数,默认auto,数字越大,盒子高度越高
+            默认auto情况下,按照书写顺序,后来者居上
+
+            定位拓展：
+                固定定位某些情况下和绝对定位的特殊情况(以视口为基准点边偏移时)是一样的
+                定位实现盒子上下左右居中：
+                    1.position定位边偏移top: 50%; left: 50%;
+                         边偏距 left,视口边到盒子左边的距离;right,视口边到盒子右边的距离
+                    2.盒子margin-right: 负盒子的一般宽;
+                         margin-top: 负盒子的一般高;
+                         margin的基准点以position后的位置为准
+            
+            定位(绝对和固定)和浮动特殊特性:
+                设置绝对定位、固定定位和浮动                
+                1.行内元素可以设置高度和宽度
+                2.块级元素默认情况下大小变内容content大小(标准流下宽度默认会撑满)
+                  脑子想象一下带文字的盒子变成文字大小的盒子即可
+                  (这些不用管:设置高度或有内容(文字或子元素)撑开盒子,当然,内容为空的话,自然盒子为空)
+                3.不会触发外边距合并问题(脱离标准流,static、relative没有脱标)
+            
+            绝对定位和固定定位会压住标准流盒子的所有内容
+            浮动只会压住标准流盒子，但不会压住标准流盒子里的文字和图片
+            浮动产生的最初目的就是为了做文字环绕(例如图片img)效果的
+
+
+        css属性书写顺序
+        1.布局定位属性: display/position/float/...overflow等
+        2.自身属性 width/height/margin/padding/border/background
+        3.文本属性: color/font/text-decoration/text-align/...等
+        4。其它属性 border-radius/box-shadow/...等
+
+
+        context 语境；上下文
+        格式化上下文(formatting context),页面上的所有内容都是格式化上下文的一部分
+        格式化上下文是CSS中对于排版的概念，不同的格式上下文有不同的渲染规则，
+        决定box怎么排列、box与其它box的相对位置，也决定了其子元素的排列
+          BFC block formatting context
+          IFC inline formatting context
+          FFC flex formatting context
+          GFC grid formatting context
+        以上都属于normal flow，元素默认只有块级box和行内级元素box
+        块级元素box垂直向下排列，行内级元素box水平排列
+        可以用CSS的display属性改变/切换box所参与的格式上下文formatting context
+        有些属性可以对box内创建一个格式上下文环境
+        用display: flow-root;显式对盒子内创建块格式上下文
+        (用float和position脱离normal flow)
+        根据CSS规范:不同格式上下文布局它们的盒子根据不同的规则
+
+        术语：
+        <html>根元素 
+        block-level boxes是元素产生的block box,block containing box是包含后代元素的block box
+        举例理解：一个box本身参与BFC布局，对内创建一个BFC布局环境
+        display: inline; 行内格式上下文,在标准流中,元素/盒子在布局中为行内元素,对内为行内元素父容器
+
+
+        触发bfc,对内创建一个bfc布局环境
+        例子：overflow: hidden;会触发BFC(用这属性的意义真的仅仅是创建一个BFC而已。。。你妹的。。。)
+             overfow的值只要不是visible就会触发BFC
+        使用display:flow-root显示创建BFC,不会产生其它副作用
+
+        试着自己理解一下，float、position脱离标准流，然后设置某些属性会触发bfc,对盒子内创建一个bfc布局环境
+        盒子内的子元素就根据bfc规则布局
+        (触发bfc的条件在MDN web docs有列出,display: flow-root;显式创建BFC,且没有任何副作用)
+        float、position使设置这些属性的盒子脱离所属的normal flow
+        某些属性触发该盒子对内的格式化上下文(该盒子的子元素根据该盒子的格式上下文<规则>布局)
+        貌似思绪稍微理清了一下。。。
+        文档最外层元素(<html>)使用块布局规则称为初始块格式上下文(默认元素有block-level box和inline_level box)
+        仅个人理解(不权威)，就像设置了float属性，盒子没有跳出浏览器视口一样，触发对内格式上下文的盒子的子元素float后也不会溢出该盒子
+
+        [附件,暂不需要,忽略这段话
+        个人经验记录(不保对,以后可能会删)：子元素是可以撑开/撑破/超过父元素的
+        BFC的规则(需要的部分),IFC,FFC,GFC都有相应的规则(由CSS规范规定):
+          1.BFC就是页面上的一个隔离的独立容器，容器内的子元素不会影响到外面的元素
+          2.计算BFC的高度时，浮动元素也参与计算
+        这一段忽略，网上别人的文章，我有没看过规范，不知道上面这两条是否准确]
+
+        显示与隐藏:
+            display显示
+            display: none; 元素隐藏,隐藏后不再占有原来的位置
+            应用广泛，搭配js可以做很多网页特效
+
+            visibility可见性
+            visibility: hidden; 元素隐藏，隐藏后继续占有原来的位置
+
+            上面两个一个没有一个隐藏更好记...
+
+            overflow 溢出
+            overflow: visible; 默认溢出部分显示
+            overflow: hidden; 隐藏溢出部分
+            overflow: scroll; 带滚动条的
+            overflow: auto; 按需显示滚动条
+
+        经验总结:
+            标准流布局下盒子height设置100%无效
+
+        精灵图sprites
+        目的：减少服务器接收和发送请求的次数,提高页面加载速度
+        (多个小图片在一张图上,一次发送完成)
+        使用：给盒子添加背景图片(通过设置background属性)，通过background-position移动背景图片
+             background-repeat: no-repeat;
+        
+        CSS三角形
+        盒子只有边框(有px值的变量)没有宽高(必须设置为0),就会得到四个三角形组成的盒子
+        设置某一边框的背景颜色,就会显示三角形
+        应用：带三角形的盒子,盒子相对定位,实现三角形的子盒子绝对定位,调整子盒子位置即可
+        原理：理解的角度就是想象一下四条粗边如何拼成一个矩形...我暂时还是没理解得很透...
+
+        vertical-align 行内元素?(暂时还不理解)和行内块元素才有的属性
+        bottom baseline middle top
+        应用场景：行内块元素与文字对齐(属性值自己写写看就知道了啦)
+        行内块元素,例如<img>
+        解决img在盒子中默认底部会留空白缝隙,行内块元素默认基线对齐baseline
+        方法:1.img, display: block;
+             2.img, vertical-align: bottom; 非baseline
+
+        单行文字省略号显示
+        white-space,空白(空白字符,就是非显示字符,例如空格符和换行符)
+        默认值：normal，自动换行
+        wrap 包裹
+        1.white-space: nowrap; 不包(裹) 空白(字符,非显示字符,例如空格符和换行符)
+        没有换行符,字符无法换行,文字溢出盒子
+        2.overflow: hidden; 隐藏溢出的文字
+        3.text-overflow: ellipsis; 溢出部分(包含省略号也占用了一部分)文档用ellipsis省略号显示
+
+        多行文字省略号显示：有需要再去看P266就好,适合webkit内核浏览器和移动端(移动端大部分是webkit内核)
+
+        取消输入框轮廓，outline: none;
+        文本域textarea禁止用户拖动大小 resize: none
+
+    CSS初始化(也称CSS reset),重设浏览器的样式:
+        不同浏览器对有些标签的默认值是不同的，消除不同浏览器对html文本呈现的差异
+        照顾浏览器的兼容性
+        中文字体名称用unicode编码代替,避免浏览器出现乱码
+        例如: 黑体 \9ED1\4F53
+        ==>其实目前还不太明白,暂时不想了解...
+
+    border-box
+
+
+        transform 动词,使转换/改变
+        rotate 旋转
+
+*/
+
+/*
+    border-radius: 10px;
+    border-radius: 50%;
+    配合正方形盒子可得到圆形
+    border-radius: 左上角 右上角 右下角 左下角;
+
+    box-shadow: h-shadow v-shadow blur spread color inset
+    只有1和2属性值是必须的(x和y轴,正px下右,负px左上
+    blur 模糊 10px 不懂为啥用px。。。
+    spread 阴影的尺寸/面积大小
+    inset 内阴影,阴影在box内
+    注意：阴影不影响相邻的盒子
+*/
+
+
+/* CSS ruleses: CSS规则集/规则 */
+/* 花括号前的部分为选择器selector，可用逗号分隔出一组选择器  */
+/* CSS declaration block: CSS声明块，指花括号部分 */
+* {
+    /* 覆盖浏览器默认CSS规则 */
+    margin: 0;
+    padding: 0;
+    /* CSS declaration: CSS声明 */
+    /* 属性：值  */
+    /* property：value  */
+}
+/* 一个元素可能被多个选择器选中，选择器优先级高的生效，成为层叠/级联cascade算法 */
+/* inheritance 继承  */
+
+/* 根元素 html */
+html {
+    min-height: fit-content;
+    background-color: dimgray;
+}
+
+body {
+    background-image: url("bg.jpg");
+    background-position: right;
+}
+
+/*
+multiple selectors
+th, td {
+    text-align: center;
+}
+*/
+
+/* 标准盒模型的基本属性：我自己方便记忆的概念，与官方文档有冲突我会删除
+    margin: 10px;
+    border: 0px solid white;
+    padding: 0;
+    width: 100%;
+    height: 50px;
+---------------------------------------------------------------*/
+
+/* 标准盒模型 */
+/* flexbox弹性盒子 */
+.box {
+    /* box-sizing默认为content-box */
+    /* box-sizing: border-box; */
+    width: 100%;
+    height: 48px;
+    margin: 0;
+    border: 0px solid cadetblue;
+    padding: 0;
+    /* border: 10px solid blueviolet; */
+    /* min-width: 1500px; */
+
+    /* 导航栏固定相关 */
+    /* position: absolute; */
+    /* fixed：固定的  top属性：距离顶部*/
+    position: fixed;
+    top: 0px;
+
+    font-size: 15px;
+    /* text-align: center; */
+    background-color: black;
+}
+
+.box>ul {
+    width: auto;
+    height: auto;
+    padding: 15px 0px 0px 50px;
+
+    float: left;
+}
+
+
+/* >为子选择器 父元素>子元素 */
+/* 关系选择器 */
+.box>ul>li {
+    width: auto;
+    height: auto;
+    padding: 0px 25px 0px 0px;
+    border: 0;
+    margin: 0px;
+    /* border: 10px solid cornflowerblue; */
+    /* inline行内元素有margin吗？ */
+    /* margin: 20px auto 5px auto; */
+
+    /* background-color: dimgray; */
+    list-style: none;
+    display: inline;
+}
+
+.box>ul>li>a {
+    /* decoration 装饰,例如超链接的下划线 */
+    text-decoration: none;
+
+    /* background-color: yellow; */
+}
+
+/* 为访问时的状态 */
+.box>ul>li>a:link {
+    color: white;
+}
+
+/* hover:悬停 鼠标移动到链接时的状态 */
+/*
+.box>ul>li>a:hover {
+    color: cyan;
+    background-color: darkturquoise;
+}
+*/
+
+/* 鼠标按下去时的状态 目前感觉没啥用啊 应该是我还不会用。。。 */
+/*
+.box>ul>li>a:active {
+    color: chartreuse;
+}
+*/
+
+.box>ul>li>a:visited {
+    color: white;
+}
+
+.form1 {
+    width: 220px;
+    height: 150px;
+    margin: 250px auto auto auto;
+    /* 4参数时 上 右 下 左 */
+    padding: 35px 20px 25px 20px;
+    border: 0px solid beige;
+    background-color: steelblue;
+    /* rgba 设置透明度*/
+    /*background-color: rgba(0, 0, 0, 0.5);*/
+
+    /* radius 半径 */
+    border-radius: 25px;
+    /* box-shadow: 5px 5px 5px 5px darkturquoise; */
+}
+
+#background_image {
+    width: 150px;
+    height: 100px;
+    /*background-color: palevioletred;*/
+    background-image: url("tel.png");
+    /* 
+        默认是repeat，背景图片平铺  无平铺 x轴平铺 y轴平铺
+        背景图片在背景颜色之上
+    */
+    /*background-repeat: repeat;*/
+    background-repeat: no-repeat;
+    /*background-repeat: repeat-x;*/
+    /*background-repeat: no-repeat-y;*/
+    background-position: left center;
+
+    /* 用像素，第一个参数是x轴,第二个参数是y轴,与方位不同,方位是灵活的 */
+    /*background-position: 20px 50px;*/
+    /*background-position: 20px center;*/
+    /*background-position: center 50px;*/
+
+    /* attachment,附件 背景图片固定和滚动 */
+    /*background-attachment: fixed;*/
+    /*background-attachment: scroll;*/
+
+    /* red green blue alpha透明度 */
+    /*background: rgba(0,0,0,0.3);*/
+}
+
+#h3_1 {
+    line-height: 100px;
+    padding-left: 35px;
+}
+
+/*
+.content-box {
+    width: auto;
+    height: 50px;
+    padding: 5px;
+    border: 5px solid black;
+    margin: 20px auto;
+
+    min-width: 1000px;
+}
+*/
+
+/* border-box不包含外边距margin */
+/*
+.border-box {
+    width: auto;
+    height: 50px;
+    padding: 5px;
+    border: 5px solid black;
+
+    min-width: 1000px;
+}
+*/
+
+/*
+    viewport 视口(浏览器显示网页的部分)
+    html {
+        height: 100%;
+        min-height: 500px;
+    }
+    html盒子模型高度与视口高度一致;
+    100%高度或宽度的依据为父元素;html依据视口的高宽
+    视口小于500px时,html高度为500px;
+
+    
+    理解:层叠样式表
+    子元素在父元素上层叠
+*/

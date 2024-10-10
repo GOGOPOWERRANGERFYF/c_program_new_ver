@@ -901,8 +901,95 @@ print(D.__mro__)
 
 希望这次解释更加清晰了！如果有任何其他疑问，请随时提问。
 
+### 问题：python的local作用域和嵌套作用域如何区分？
+在Python中，局部作用域（Local Scope）和嵌套作用域（Nested Scope）都是用来描述变量可见性和生命周期的概念。下面我将详细解释这两种作用域的区别及其用法。
 
-### 问题：
+### 局部作用域（Local Scope）
+
+局部作用域是指在一个函数内部定义的变量的作用域。这些变量只能在定义它们的函数内部访问。一旦函数执行完毕，这些变量就会被销毁。局部作用域中的变量不能从函数外部访问。
+
+#### 示例
+
+```python
+def local_scope_example():
+    local_var = 10
+    print(local_var)  # 输出 10
+
+local_scope_example()
+print(local_var)  # NameError: name 'local_var' is not defined
+```
+
+在这个例子中，`local_var` 是局部作用域中的变量，只能在 `local_scope_example` 函数内部访问。
+
+### 嵌套作用域（Nested Scope）
+
+嵌套作用域是指在一个函数内部定义的另一个函数的作用域。在这种情况下，内部函数可以访问外部函数定义的变量。但是，如果内部函数需要修改外部函数定义的变量，则需要使用 `nonlocal` 关键字来声明这个变量。
+
+#### 示例
+
+```python
+def outer_function():
+    nested_var = 10
+    
+    def inner_function():
+        print(nested_var)  # 访问外部函数定义的变量
+        nonlocal nested_var  # 声明 nested_var 是外部函数定义的变量
+        nested_var += 1
+        print(nested_var)  # 修改外部函数定义的变量
+    
+    inner_function()
+    print(nested_var)  # 再次访问外部函数定义的变量
+
+outer_function()
+```
+
+在这个例子中，`nested_var` 是 `outer_function` 的局部变量，但是 `inner_function` 也可以访问它。通过使用 `nonlocal` 关键字，`inner_function` 可以修改 `outer_function` 中定义的 `nested_var` 变量。
+
+### 区别总结
+
+- **局部作用域**：变量仅在其定义的函数内部有效。一旦函数执行结束，变量就会被销毁。
+  
+- **嵌套作用域**：当一个函数内部定义了另一个函数时，内部函数可以访问外部函数定义的变量。如果内部函数需要修改外部函数定义的变量，则需要使用 `nonlocal` 关键字来声明这个变量。
+
+### 作用域规则（LEGB）
+
+Python 中的作用域规则遵循 LEGB 规则：
+
+- Local：最内层作用域，如函数内部定义的变量。
+- Enclosing：嵌套作用域，即外部函数定义的变量。
+- Global：全局作用域，即模块级别的变量。
+- Built-in：内置作用域，包含 Python 内置函数和变量。
+
+当查找变量时，Python 首先在局部作用域中查找，如果没有找到，则继续在外层作用域中查找，直到全局作用域和内置作用域。
+
+### 示例
+
+下面是一个综合示例，展示了局部作用域、嵌套作用域以及 `nonlocal` 的使用：
+
+```python
+global_var = 100
+
+def outer_function():
+    outer_var = 10
+    
+    def inner_function():
+        nonlocal outer_var  # 声明 outer_var 是外部函数定义的变量
+        print(outer_var)  # 访问外部函数定义的变量
+        outer_var += 1
+        print(outer_var)  # 修改外部函数定义的变量
+        print(global_var)  # 访问全局变量
+    
+    inner_function()
+    print(outer_var)  # 再次访问外部函数定义的变量
+
+outer_function()
+print(global_var)  # 再次访问全局变量
+```
+
+在这个示例中，`outer_var` 是 `outer_function` 的局部变量，但 `inner_function` 通过 `nonlocal` 关键字可以访问并修改它。同时，`inner_function` 也可以访问全局变量 `global_var`。
+
+希望这些信息能帮助你更好地理解Python中的局部作用域和嵌套作用域！如果还有任何问题，请随时提问。
+
 ### 问题：
 ### 问题：
 ### 问题：
