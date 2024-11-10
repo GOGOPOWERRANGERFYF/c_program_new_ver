@@ -1,7 +1,11 @@
 /* CSS cascade stylesheet 层叠样式表 
     终于能形象理解层叠样式表了，子元素样式表层叠在父元素样式表上
 
-    并集选择器：选择器1, 选择器2 {}
+    置换元素：使用外部资源展示内容
+    非置换元素
+
+    color: 前景色(文字，边框默认同一前景色)
+    background-color: 背景色
 
     DOM document object model
 
@@ -39,9 +43,14 @@
         flexbox (wrap 包裹)
         grids
 
-
+    选择器:
     * 通配选择器 universal selector；关系选择符对优先级没有影响?这里还没理解
     选择页面的所有标签/元素，权重为0，优先级应该是最低的，所以最容易被覆盖
+
+    并集选择器：选择器1, 选择器2 {}
+
+    多类选择器 .class1.class2 {} 
+    <div class="class1 class2"> DOMTokenList(DOM词列表"class1 class2",空格分隔)
 
     内联样式>内部样式>外部样式
 
