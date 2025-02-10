@@ -6,7 +6,7 @@
     重要知识点:
         void* 返回或传入一个指针,但不确定指向的类型时使用;
         空指针作为右值赋值时会隐式转换成相应类型的指针(C++不行);
-        你也可以自己显示转换成相应的类型;
+        你也可以自己显式转换成相应的类型;
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,7 +54,7 @@ sub_class * initSubObjectPointer(void) {
     //subClass_object_pointer->super_class.info = "This is superClass info";
     printf("%zd %p\n", sizeof *"This is superClass info", "This is superClass info");
     subClass_object_pointer->super_class.info_first_element = "This is superClass info";
-    // 字符指针类型显示转换成指向字符数组的指针类型(参照int类型声明,省略了标识符)
+    // 字符指针类型显式转换成指向字符数组的指针类型(参照int类型声明,省略了标识符)
     subClass_object_pointer->super_class.info = (char (*)[25])"This is superClass info";
     printf("> %p %zd\n",
      subClass_object_pointer->super_class.info, sizeof *(subClass_object_pointer->super_class.info));

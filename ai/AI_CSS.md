@@ -1168,8 +1168,174 @@ Flex 布局提供了一种强大而灵活的方式来进行页面布局，可以
 - `flex-shrink: 1`：定义项目的缩小比例为1，当容器空间不足时，该项目会按比例缩小。
 - `flex-basis: 0`：定义项目在分配剩余空间之前的初始大小为0，即不考虑项目自身的初始尺寸，优先根据放大和缩小比例来分配空间。
 
-### 问题：
-### 问题：
+### 问题：pre-wrap的英文意义是什么？
+`pre-wrap` 是CSS `white-space` 属性的一个值，它的英文意义可以从其名称和功能两个方面来解释。
+
+### 名称解析
+
+1. **`pre`**：
+   - "pre" 是 "preformatted" 的缩写，意为“预格式化”。这个词来源于早期的HTML `<pre>` 标签，该标签用于显示预格式化的文本，保留文本中的空白符和换行符。
+
+2. **`wrap`**：
+   - "wrap" 意为“换行”或“折行”。在这个上下文中，它表示文本会在必要时在容器边界处自动换行。
+
+### 功能解析
+
+1. **保留空白符**：
+   - `pre-wrap` 保留文本中的空白符（如空格、制表符等），不会将它们合并或删除。
+
+2. **保留换行符**：
+   - `pre-wrap` 保留文本中的换行符，显示为实际的换行。
+
+3. **自动换行**：
+   - `pre-wrap` 允许文本在容器边界处自动换行，以防止文本溢出容器。
+
+### 英文意义总结
+
+`pre-wrap` 的英文意义可以概括为：“预格式化并允许换行”。这意味着文本将保留其原始的空白符和换行符格式，同时在必要时会在容器边界处自动换行。
+
+### 示例
+
+以下是一个简单的示例，展示了 `white-space: pre-wrap` 的用法：
+
+#### HTML
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>White Space Pre-Wrap Example</title>
+  <style>
+    .pre-wrap {
+      white-space: pre-wrap;
+      border: 1px solid black;
+      width: 200px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="pre-wrap">
+    This is some text with    multiple spaces and
+    line breaks. It will be displayed exactly as it is written,
+    including spaces and line breaks.
+  </div>
+</body>
+</html>
+```
+
+### 解释
+
+- **`white-space: pre-wrap;`**：
+  - 保留文本中的空白符和换行符。
+  - 在必要时，文本会在容器边界处自动换行。
+
+### 对比其他 `white-space` 值
+
+为了更好地理解 `pre-wrap`，可以对比其他 `white-space` 值：
+
+1. **`normal`**：
+   - 默认值，连续的空白符会被合并为一个空格，行尾的空白符会被忽略，文本会在容器边界处自动换行。
+
+2. **`pre`**：
+   - 保留文本中的空白符和换行符，文本不会自动换行。
+
+3. **`nowrap`**：
+   - 连续的空白符会被合并为一个空格，行尾的空白符会被忽略，文本不会自动换行。
+
+4. **`pre-line`**：
+   - 保留文本中的换行符，连续的空白符会被合并为一个空格，文本会在容器边界处自动换行。
+
+### 总结
+
+`pre-wrap` 的英文意义是“预格式化并允许换行”，它保留文本中的空白符和换行符，同时允许文本在容器边界处自动换行。这使得 `pre-wrap` 非常适合用于显示需要保留原始格式的文本，如代码块、诗歌等。如果你有任何其他问题或需要进一步的帮助，请随时提问！
+
+### 问题：wrap不是包裹的意思吗?如何理解出换行的意思？
+你说得对，“wrap” 在英语中确实有“包裹”的意思，但它也有“折行”或“换行”的意思，尤其是在计算机和排版领域。让我们详细解释一下 `pre-wrap` 中的 “wrap” 是如何与换行相关的。
+
+### 词源和多重含义
+
+1. **包裹（Wrap）**：
+   - “wrap” 最常见的意思是“包裹”，例如用纸包裹礼物。
+   - 在编程和计算机科学中，这个词有时也用来表示将数据或对象包装在一个结构中，例如 `wrap` 函数。
+
+2. **折行/换行（Wrap）**：
+   - 在文本处理和排版中，“wrap” 特指文本在到达容器边界时自动换行的行为。
+   - 例如，当一行文本太长，超过了容器的宽度时，文本会自动折到下一行，这就是所谓的“换行”或“折行”。
+
+### `pre-wrap` 的具体含义
+
+`pre-wrap` 是CSS `white-space` 属性的一个值，它的具体含义可以从以下几个方面来理解：
+
+1. **保留空白符**：
+   - `pre-wrap` 保留文本中的空白符（如空格、制表符等），不会将它们合并或删除。
+
+2. **保留换行符**：
+   - `pre-wrap` 保留文本中的换行符，显示为实际的换行。
+
+3. **自动换行**：
+   - `pre-wrap` 允许文本在容器边界处自动换行，以防止文本溢出容器。
+
+### 示例说明
+
+假设有一个文本段落，我们希望它在显示时保留原有的空白符和换行符，同时在必要时自动换行。我们可以使用 `pre-wrap` 来实现这一点。
+
+#### HTML
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>White Space Pre-Wrap Example</title>
+  <style>
+    .pre-wrap {
+      white-space: pre-wrap;
+      border: 1px solid black;
+      width: 200px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="pre-wrap">
+    This is some text with    multiple spaces and
+    line breaks. It will be displayed exactly as it is written,
+    including spaces and line breaks.
+  </div>
+</body>
+</html>
+```
+
+### 解释
+
+- **`white-space: pre-wrap;`**：
+  - 保留文本中的空白符和换行符。
+  - 在必要时，文本会在容器边界处自动换行。
+
+### 对比其他 `white-space` 值
+
+为了更好地理解 `pre-wrap`，可以对比其他 `white-space` 值：
+
+1. **`normal`**：
+   - 默认值，连续的空白符会被合并为一个空格，行尾的空白符会被忽略，文本会在容器边界处自动换行。
+
+2. **`pre`**：
+   - 保留文本中的空白符和换行符，文本不会自动换行。
+
+3. **`nowrap`**：
+   - 连续的空白符会被合并为一个空格，行尾的空白符会被忽略，文本不会自动换行。
+
+4. **`pre-line`**：
+   - 保留文本中的换行符，连续的空白符会被合并为一个空格，文本会在容器边界处自动换行。
+
+### 总结
+
+在 `pre-wrap` 中，“wrap” 的意思是“换行”或“折行”，而不是“包裹”。`pre-wrap` 保留文本中的空白符和换行符，并允许文本在容器边界处自动换行。这使得 `pre-wrap` 非常适合用于显示需要保留原始格式的文本，如代码块、诗歌等。如果你有任何其他问题或需要进一步的帮助，请随时提问！
+
 ### 问题：
 ### 问题：
 ### 问题：

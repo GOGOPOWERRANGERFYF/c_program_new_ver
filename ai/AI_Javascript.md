@@ -4652,7 +4652,116 @@ element.scrollTop = 100; // 修改 scrollTop 值
 
 通过理解这些概念，可以更好地优化网页性能，减少不必要的重绘和回流，提升用户体验。
 
-### 问题：
+### 问题：如何用js DOM的API为选择的node节点设置white-space: pre-wrap;CSS属性？
+在JavaScript中，使用DOM API为选定的节点设置 `white-space: pre-wrap;` CSS属性可以通过以下几种常见方法：
+
+### 1. 使用 `style` 属性（内联样式）
+直接通过节点的 `style` 属性来设置样式，示例如下：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>设置white-space属性</title>
+</head>
+
+<body>
+    <div id="myDiv">
+        这是一段带有空格和换行的文本内容，
+        我们希望它能按照原始格式显示。
+    </div>
+
+    <script>
+        // 获取要设置属性的节点
+        const myDiv = document.getElementById('myDiv');
+
+        // 通过style属性设置white-space为pre-wrap
+        myDiv.style.whiteSpace = 'pre-wrap';
+    </script>
+</body>
+
+</html>
+```
+
+在上述代码中，首先通过 `document.getElementById` 获取到 `id` 为 `myDiv` 的 `div` 节点，然后直接使用该节点的 `style`  属性设置 `white-space` 的值为 `pre-wrap`。这样，`myDiv` 节点内的文本就会按照原始格式（保留空格和换行）显示。
+
+### 2. 使用 `setProperty` 方法（CSSStyleDeclaration）
+可以通过获取节点的 `style` 对象（它是一个 `CSSStyleDeclaration` 类型），然后使用其 `setProperty` 方法来设置属性，示例如下：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>设置white-space属性</title>
+</head>
+
+<body>
+    <div id="myDiv">
+        这是一段带有空格和换行的文本内容，
+        我们希望它能按照原始格式显示。
+    </div>
+
+    <script>
+        // 获取要设置属性的节点
+        const myDiv = document.getElementById('myDiv');
+
+        // 获取节点的style对象
+        const styleObj = myDiv.style;
+
+        // 使用setProperty方法设置white-space为pre-wrap
+        styleObj.setProperty('white-space', 'pre-wrap');
+    </script>
+</body>
+
+</html>
+```
+
+这里先获取到 `myDiv` 节点的 `style` 对象，然后利用该对象的 `setProperty` 方法来准确地设置 `white-space` 属性的值为 `pre-wrap`。
+
+### 3. 使用 `classList` 属性添加类名（如果已有相关样式类定义）
+如果在CSS文件中已经定义了一个包含 `white-space: pre-wrap;` 属性的样式类，例如：
+
+```css
+.my-pre-wrap-class {
+    white-space: pre-wrap;
+}
+```
+
+那么可以通过JavaScript在节点上添加这个类名来实现设置该属性，示例如下：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>设置white-space属性</title>
+</head>
+
+<body>
+    <div id="myDiv">
+        这是一段带有空格和换行的文本内容，
+        我们希望它能按照原始格式显示。
+    </div>
+
+    <script>
+        // 获取要设置属性的节点
+        const myDiv = document.getElementById('myDiv');
+
+        // 通过classList属性添加已定义好的样式类名
+        myDiv.classList.add('my-pre-wrap-class');
+    </script>
+</body>
+
+</html>
+```
+
+在这种情况下，通过 `myDiv` 节点的 `classList` 属性添加 `my-pre-wrap-class` 这个类名，使得该节点应用了包含 `white-space: pre-wrap;` 属性的样式类，从而实现文本按照原始格式显示的效果。
+
 ### 问题：
 ### 问题：
 ### 问题：
