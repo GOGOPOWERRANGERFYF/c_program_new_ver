@@ -1,0 +1,74 @@
+2 Program Structure 程序结构
+    In GO, as in any other programming language, one builds large programs from a small set of
+    basic constructs. Variables store values. Simple expressions are combined into larger ones
+    with operations like addition and substraction. Basic types are collected into aggregates like
+    arrays and structs. Expressions are used in statements whose execution order is determined
+    by control-flow statements like if and for. Statements are grouped into functions for
+    isolation and reuse. Functions are gathered into source files and packages. 
+    (笔记：
+        combined into 合并为;
+        collected into 收集到;
+        aggregates 聚合(从计算机科学角度来翻译...);
+        isolation 隔离; reuse 复用;
+        gathered into 聚集在;
+    )
+
+    ...
+
+2.1 Names
+    ...
+
+2.2 Declarations 声明
+    A declaration names a program entity and specifies some or all of its properties. There are
+    four major kinds of declarations: var, const, type, and func. 
+
+
+2.3 Variales 变量
+    ...
+    Each declaration has the general form
+        var name type = expression
+    Either the type or the = expression part may be omitted(v.省略;adj.省略了的;),but not both. If the type is omitted,
+    it is determined by the initializer expression. If the expression is omitted, the initial value is
+    the zero value for the type, which is 0 for numbers, false for booleans, "" for strings, and nil
+    for interfaces and reference types(slice,pointer,map,channel,function). The zero value of an 
+    aggregate type like an array or a struct has the zero value of all of its elements or fields.
+
+2.3.1 Short Variable Declaration 短变量声明
+
+    ...
+
+2.3.2 Pointers
+    A variable is a piece of storage containing a value. Variable created by declarations are iden-
+    tified by a name, such as x, but ...
+
+    A pointer value is the address of a variable. A pointer is thus the location at which a value is
+    stored. Not every value has an address, but every variable does. With a pointer, we can read
+    or update the value of a variable indirectly, without using or even knowing the name of the
+    variable, if indeed it has a name.
+    (
+    标记：Not every value has an address, but every variable does.
+    底层为GO编译器的限制。非操作系统或硬件架构的关系。
+    )
+
+    If a variable is declared var x int, the expression &x ("address of x") yields a pointer to an
+    integer variable, ...
+
+...
+
+2.4 Assignments 赋值
+
+    笔记：
+        count[x] *= scale 避免变量表达式的重复书写(至于重复计算，用gdb调试查看汇编代码验证后关不关闭优化其实都是立即数直接入栈,可能
+        老版本的go才会有这种问题？)
+
+        Go的自增或自减运算符只有后缀形式，且只能作为语句单独使用(序列点:副作用发生完才能执行下一条语句)，不能作为表达式。与c,c++,java等都不同。。。
+    
+2.4.1 Tuple Assignment
+    ...
+
+2.4.2 Assignability
+    Assignment statements are an explicit form of assignment, but there are many places in a
+    program where an assignment occurs implicitly: a function call implicitly assgins the argument
+    values to the corresponding parameter variables; a return statement implicitly assigns the
+    return operands to the corresponding result variables; and a literal expression for a composite
+    type(§4.2) such as this slice:
